@@ -1,6 +1,6 @@
 package com.bandera1.Engine.Systems;
 
-import com.bandera1.Engine.Exemples.SceneIndex;
+import com.bandera1.SceneIndex;
 import com.bandera1.Engine.GameObjects.*;
 
 import java.util.ArrayList;

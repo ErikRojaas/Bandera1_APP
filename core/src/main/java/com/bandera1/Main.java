@@ -7,6 +7,7 @@ import com.bandera1.Engine.Systems.CollisionSystem;
 import com.bandera1.Engine.Systems.InputSystem;
 import com.bandera1.Engine.Systems.SceneSystem;
 import com.badlogic.gdx.Gdx;
+import com.bandera1.Utils.ServerUtils;
 
 public class Main extends ApplicationAdapter {
 
@@ -14,6 +15,9 @@ public class Main extends ApplicationAdapter {
     public SceneSystem sceneSystem;
     public InputSystem inputSystem;
     public CollisionSystem collisionSystem;
+    public ServerUtils serverUtils;
+
+    private static final String SERVER_HOST = "wss://bandera1.ieti.site:443";
 
     @Override
     public void create() {
@@ -22,6 +26,8 @@ public class Main extends ApplicationAdapter {
         inputSystem = new InputSystem();
         Gdx.input.setInputProcessor(inputSystem);
         collisionSystem = new CollisionSystem();
+        serverUtils = new ServerUtils(SERVER_HOST);
+        serverUtils.connect();
     }
 
     @Override

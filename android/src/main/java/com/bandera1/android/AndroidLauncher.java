@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.bandera1.Main;
+import com.github.czyzby.websocket.CommonWebSockets;
 
 /** Launches the Android application. */
 public class AndroidLauncher extends AndroidApplication {
@@ -14,5 +15,6 @@ public class AndroidLauncher extends AndroidApplication {
         AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
         configuration.useImmersiveMode = true; // Recommended, but not required.
         initialize(new Main(), configuration);
+        CommonWebSockets.initiate();
     }
 }

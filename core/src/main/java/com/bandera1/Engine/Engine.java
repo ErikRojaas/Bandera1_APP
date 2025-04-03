@@ -1,5 +1,4 @@
-package oscar.medina.galvez.engine;
-
+package com.bandera1.Engine;
 
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -10,7 +9,7 @@ import oscar.medina.galvez.engine.Systems.InputSystem;
 import oscar.medina.galvez.engine.Systems.CollisionSystem;
 import com.badlogic.gdx.Gdx;
 
-public class Main extends ApplicationAdapter {
+public class Engine extends ApplicationAdapter {
 
     public SpriteBatch batch;
     public SceneSystem sceneSystem;

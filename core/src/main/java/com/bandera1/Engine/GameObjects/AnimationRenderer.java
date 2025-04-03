@@ -1,4 +1,4 @@
-package oscar.medina.galvez.engine.GameObjects;
+package com.bandera1.Engine.GameObjects;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;

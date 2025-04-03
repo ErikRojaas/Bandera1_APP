@@ -1,4 +1,4 @@
-package oscar.medina.galvez.engine.Systems;
+package com.bandera1.Engine.Systems;
 
 import oscar.medina.galvez.engine.GameObjects.Component;
 import oscar.medina.galvez.engine.GameObjects.GameObject;

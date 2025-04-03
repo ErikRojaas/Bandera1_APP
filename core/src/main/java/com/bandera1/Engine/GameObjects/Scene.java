@@ -1,5 +1,4 @@
-package oscar.medina.galvez.engine.GameObjects;
-
+package com.bandera1.Engine.GameObjects;
 import java.util.ArrayList;
 import java.util.List;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;

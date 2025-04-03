@@ -1,6 +1,6 @@
-package oscar.medina.galvez.engine.Scenes;
+package com.bandera1.Engine.Exemples;
 
-import oscar.medina.galvez.engine.Systems.SceneSystem;
+import com.bandera1.Engine.Systems.SceneSystem;
 
 public class SceneIndex {
     public static void addAllScenes() {

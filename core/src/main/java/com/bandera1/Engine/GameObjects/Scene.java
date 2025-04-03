@@ -3,7 +3,7 @@ package com.bandera1.Engine.GameObjects;
 import java.util.ArrayList;
 import java.util.List;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import oscar.medina.galvez.engine.Systems.SceneSystem;
+import com.bandera1.Engine.Systems.SceneSystem;
 
 public class Scene {
     public List<GameObject> gameObjects;

@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 
-import oscar.medina.galvez.engine.Systems.SceneSystem;
+import com.bandera1.Engine.Systems.SceneSystem;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -1,20 +1,15 @@
 package com.bandera1.Engine.Systems;
 
-import oscar.medina.galvez.engine.GameObjects.Component;
-import oscar.medina.galvez.engine.GameObjects.GameObject;
-import oscar.medina.galvez.engine.GameObjects.Scene;
-import oscar.medina.galvez.engine.Scenes.SceneIndex;
+import com.bandera1.Engine.Exemples.SceneIndex;
+import com.bandera1.Engine.GameObjects.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 

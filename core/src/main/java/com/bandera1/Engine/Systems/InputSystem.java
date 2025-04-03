@@ -3,7 +3,7 @@ package com.bandera1.Engine.Systems;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 
-import oscar.medina.galvez.engine.Systems.SceneSystem;
+import com.bandera1.Engine.Systems.SceneSystem;
 import java.util.HashSet;
 import java.util.Set;
 

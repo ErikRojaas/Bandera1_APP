@@ -8,10 +8,10 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import oscar.medina.galvez.engine.GameObjects.Collider;
-import oscar.medina.galvez.engine.GameObjects.Component;
-import oscar.medina.galvez.engine.GameObjects.Scene;
-import oscar.medina.galvez.engine.GameObjects.GameObject;
+import com.bandera1.Engine.GameObjects.Collider;
+import com.bandera1.Engine.GameObjects.Component;
+import com.bandera1.Engine.GameObjects.Scene;
+import com.bandera1.Engine.GameObjects.GameObject;
 
 public class CollisionSystem {
     private Set<CollisionPair> activeCollisions = new HashSet<>();

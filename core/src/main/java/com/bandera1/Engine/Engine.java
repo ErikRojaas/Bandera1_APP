@@ -1,6 +1,5 @@
 package com.bandera1.Engine;
 
-
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 

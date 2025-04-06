@@ -67,6 +67,7 @@ public class GameObject implements Serializable {
     public final void addComponent(Component component) {
         components.add(component);
         component.gameObject = this;
+        component.init();
     }
 
     public final void removeComponent(Component component) {
@@ -74,7 +75,7 @@ public class GameObject implements Serializable {
         component.gameObject = null;
     }
 
-    public GameObject deepClone() {
+    private GameObject deepClone() {
         try {
             // Serialize the object to a byte array
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -94,28 +95,65 @@ public class GameObject implements Serializable {
         }
     }
 
-    public static void instantiate(GameObject gameObject, Vector2 position, float rotation) {
+    private static void alterCloneName(GameObject clone) {
+       //get a number from the name if it has one
+       int number = 0;
+       String name = clone.name;
+       if (name.contains("#")) {
+           number = Integer.parseInt(name.substring(name.indexOf("#") + 1));
+           String prefix = name.substring(0, name.indexOf("#"));
+           clone.name = prefix + "#" + number+1;
+       } else {
+           clone.name += "#1";
+       }
+    }
+
+    public static GameObject instantiate(GameObject gameObject, Vector2 position, float rotation) {
         GameObject clone = gameObject.deepClone();
         gameObject.transform.position = position;
         gameObject.transform.rotation = rotation;
+        for (Component component : clone.components) {
+            component.gameObject = clone;
+            component.init();
+        }
         SceneSystem.activeScene.addGameObject(clone);
+        alterCloneName(clone);
+        return clone;
     }
 
-    public static void instantiate(GameObject gameObject, float rotation) {
+    public static GameObject instantiate(GameObject gameObject, float rotation) {
         GameObject clone = gameObject.deepClone();
         gameObject.transform.rotation = rotation;
+        for (Component component : clone.components) {
+            component.gameObject = clone;
+            component.init();
+        }
         SceneSystem.activeScene.addGameObject(clone);
+        alterCloneName(clone);
+        return clone;
     }
 
-    public static void instantiate(GameObject gameObject, Vector2 position) {
+    public static GameObject instantiate(GameObject gameObject, Vector2 position) {
         GameObject clone = gameObject.deepClone();
         gameObject.transform.position = position;
+        for (Component component : clone.components) {
+            component.gameObject = clone;
+            component.init();
+        }
         SceneSystem.activeScene.addGameObject(clone);
+        alterCloneName(clone);
+        return clone;
     }
 
-    public static void instantiate(GameObject gameObject) {
+    public static GameObject instantiate(GameObject gameObject) {
         GameObject clone = gameObject.deepClone();
+        for (Component component : clone.components) {
+            component.gameObject = clone;
+            component.init();
+        }
         SceneSystem.activeScene.addGameObject(clone);
+        alterCloneName(clone);
+        return clone;
     }
 
     public static GameObject Find(String name) {
@@ -125,6 +163,10 @@ public class GameObject implements Serializable {
             }
         }
         return null;
+    }
+
+    public static void Destroy(GameObject gameObject) {
+        SceneSystem.activeScene.removeGameObject(gameObject);
     }
 }
 

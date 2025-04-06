@@ -12,6 +12,10 @@ public class Component implements Serializable {
         enabled = true;
     }
 
+    public void init() {
+
+    }
+
     public void start() {
 
     }

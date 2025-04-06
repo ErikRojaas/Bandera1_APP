@@ -26,6 +26,7 @@ public class Main extends ApplicationAdapter {
         inputSystem = new InputSystem();
         Gdx.input.setInputProcessor(inputSystem);
         collisionSystem = new CollisionSystem();
+        
         serverUtils = new ServerUtils(SERVER_HOST);
         serverUtils.connect();
     }

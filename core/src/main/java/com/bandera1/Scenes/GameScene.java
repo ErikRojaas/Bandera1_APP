@@ -9,7 +9,7 @@ import com.bandera1.Components.*;
 import com.badlogic.gdx.graphics.Texture;
 
 public class GameScene extends Scene {
-    GameScene() {
+    public GameScene() {
         super();
         GameObject background = new GameObject("background");
         background.addComponent(new TextureRenderer(new Texture("background.png")));

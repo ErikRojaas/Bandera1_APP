@@ -4,7 +4,9 @@ import com.bandera1.Utils.ServerMessage;
 import com.bandera1.Utils.ServerUtils;
 import com.bandera1.Utils.WebSocketEventListener;
 import com.bandera1.Engine.GameObjects.GameObject;
+import com.bandera1.Engine.GameObjects.TextureRenderer;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
 import java.util.HashMap;
@@ -25,6 +27,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         otherPlayers = new HashMap<>();
         playerPrefab = new GameObject("player");
         playerPrefab.addComponent(new Player());
+        playerPrefab.addComponent(new TextureRenderer(new Texture("player.png")));
         //not adding moving component
     }
 

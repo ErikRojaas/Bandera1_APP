@@ -1,10 +1,10 @@
 package com.bandera1.Scenes;
 
-import com.bandera1.Components.Player;
 import com.bandera1.Engine.GameObjects.GameObject;
 import com.bandera1.Engine.GameObjects.Scene;
 import com.bandera1.Engine.GameObjects.TextureRenderer;
-import com.bandera1.Components.PlayerManager;
+import com.bandera1.Components.*;
+
 
 import com.badlogic.gdx.graphics.Texture;
 
@@ -18,6 +18,8 @@ public class GameScene extends Scene {
         GameObject player = new GameObject("player");
         player.addComponent(new TextureRenderer(new Texture("player.png")));
         player.addComponent(new Player());
+        player.addComponent(new FollowCamera());
+        player.addComponent(new PlayerMovement());
         addGameObject(player);
 
         GameObject gameManger = new GameObject("gameManager");

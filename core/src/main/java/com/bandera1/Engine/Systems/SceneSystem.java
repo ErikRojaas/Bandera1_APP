@@ -4,7 +4,9 @@ import com.bandera1.SceneIndex;
 import com.bandera1.Engine.GameObjects.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -16,7 +18,7 @@ import com.badlogic.gdx.graphics.GL20;
 
 
 public class SceneSystem {
-    public static List<Scene> scenes = new java.util.ArrayList<>();
+    public static Map<String, Scene> scenes;
     public static Scene activeScene;
     public static List<GameObject> newGameObjects;
     public static FitViewport viewport;
@@ -28,6 +30,7 @@ public class SceneSystem {
     public SceneSystem(int w, int h) {
         width = w;
         height = h;
+        scenes = new HashMap<>();
         viewport = new FitViewport(width, height);
         camera = new OrthographicCamera(width, height);
         camera.position.set(0, 0, 0);
@@ -57,22 +60,26 @@ public class SceneSystem {
         batch.end();
     }
 
-    public static void addScene(Scene scene) {
-        scenes.add(scene);
+    public static void addScene(String name, Scene scene) {
+        scenes.put(name, scene);
         if (scenes.size() == 1) {
             activeScene = scene;
         }
     }
 
-    public static void removeScene(Scene scene) {
-        scenes.remove(scene);
+    public static void removeScene(String name) {
+        scenes.remove(name);
         if (scenes.size() == 0) {
             activeScene = null;
         }
     }
 
-    public static void changeScene(Scene scene) {
-        activeScene = scene;
+    public static void changeScene(String name) {
+        if (scenes.containsKey(name)) {
+            activeScene = scenes.get(name);
+            newGameObjects.clear();
+            newGameObjects.addAll(activeScene.gameObjects);
+        }
     }
 
     public static void MoveCameraBy(float x, float y) {
@@ -109,7 +116,7 @@ public class SceneSystem {
     }
 
     public void dispose() {
-        for (Scene scene : scenes) {
+        for (Scene scene : scenes.values()) {
             scene.dispose();
         }
     }

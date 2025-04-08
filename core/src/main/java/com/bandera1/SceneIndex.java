@@ -5,7 +5,7 @@ import com.bandera1.Engine.Systems.SceneSystem;
 
 public class SceneIndex {
     public static void addAllScenes() {
-        SceneSystem.addScene(new MenuScene());
-        SceneSystem.addScene(new GameScene());
+        SceneSystem.addScene("Menu",new MenuScene());
+        SceneSystem.addScene("Game",new GameScene());
     }
 }

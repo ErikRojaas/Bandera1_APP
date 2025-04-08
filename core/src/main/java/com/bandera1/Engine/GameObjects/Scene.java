@@ -26,7 +26,9 @@ public class Scene {
     public void addGameObject(GameObject gameObject) {
         if (gameObjects.contains(gameObject)) return;
         gameObjects.add(gameObject);
-        SceneSystem.newGameObjects.add(gameObject);
+        if (SceneSystem.activeScene == null) {
+            SceneSystem.newGameObjects.add(gameObject);
+        }
     }
 
     public void removeGameObject(GameObject gameObject) {

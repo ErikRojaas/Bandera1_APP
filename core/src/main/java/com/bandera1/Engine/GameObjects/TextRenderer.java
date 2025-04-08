@@ -23,12 +23,18 @@ public class TextRenderer extends Component {
     @Override
     public void render(SpriteBatch batch) {
         GlyphLayout layout = new GlyphLayout(font, text);
-
+        font.setUseIntegerPositions(false);
+        font.getData().setScale(gameObject.transform.scale.x, gameObject.transform.scale.y);
         font.draw(
             batch,
             text,
             gameObject.transform.position.x - layout.width / 2f + offsetX,
             gameObject.transform.position.y + layout.height / 2f + offsetY // Y is from baseline, not bottom
         );
+    }
+
+    @Override
+    public void dispose() {
+        font.dispose();
     }
 }

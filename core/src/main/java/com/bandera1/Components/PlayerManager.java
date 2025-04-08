@@ -21,6 +21,8 @@ import com.bandera1.Engine.GameObjects.Component;
 public class PlayerManager extends Component implements WebSocketEventListener {
     private GameObject player;
     private Map<String, GameObject> otherPlayers;
+    private boolean active;
+    private Texture playerTexture;
 
     @Override
     public void init() {
@@ -30,7 +32,9 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
     @Override
     public void start() {
+        active = true;
         player = GameObject.Find("player");
+        playerTexture = new Texture("player.png");
     }
 
     @Override
@@ -47,6 +51,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
     @Override
     public void onMessage(ServerMessage message) {
+        if (!active) return;
         if (message.type.equals("update")) {
             JsonValue data = message.data;
             // Update client player position
@@ -88,7 +93,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                 float x = playerData.getFloat("x");
                 float y = playerData.getFloat("y");
                 GameObject newPlayer = new GameObject("player " + playerId);
-                newPlayer.addComponent(new TextureRenderer(new Texture("player.png")));
+                newPlayer.addComponent(new TextureRenderer(playerTexture));
                 newPlayer.addComponent(new Player(playerId));
                 newPlayer.transform.position = new Vector2(x, y);
                 newPlayer.transform.scale.set(0.5f,0.5f);

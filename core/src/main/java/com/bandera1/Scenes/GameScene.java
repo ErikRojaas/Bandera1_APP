@@ -13,6 +13,7 @@ public class GameScene extends Scene {
         super();
         GameObject gameManger = new GameObject("gameManager");
         gameManger.addComponent(new PlayerManager());
+        gameManger.addComponent(new KeyManager());
         addGameObject(gameManger);
 
         GameObject background = new GameObject("background");
@@ -26,7 +27,5 @@ public class GameScene extends Scene {
         player.addComponent(new PlayerMovement());
         player.addComponent(new FollowCamera());
         addGameObject(player);
-
-
     }
 }

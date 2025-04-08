@@ -5,24 +5,21 @@ import com.bandera1.Utils.ServerUtils;
 import com.bandera1.Utils.WebSocketEventListener;
 import com.bandera1.Engine.GameObjects.GameObject;
 import com.bandera1.Engine.GameObjects.Scene;
-import com.bandera1.Engine.GameObjects.TextureRenderer;
+import com.bandera1.Engine.Systems.SceneSystem;
+import com.bandera1.Engine.GameObjects.Component;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
-import com.bandera1.Engine.Systems.SceneSystem;
-
-import com.bandera1.Engine.GameObjects.Component;
 
 public class PlayerManager extends Component implements WebSocketEventListener {
     private GameObject player;
     private Map<String, GameObject> otherPlayers;
     private boolean active;
-    private Texture playerTexture;
 
     @Override
     public void init() {
@@ -34,7 +31,15 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     public void start() {
         active = true;
         player = GameObject.Find("player");
-        playerTexture = new Texture("player.png");
+
+        // Añadimos el PlayerRenderer al jugador local si no lo tiene ya
+        if (player != null && player.getComponent(PlayerRenderer.class) == null) {
+            PlayerRenderer renderer = new PlayerRenderer();
+            player.addComponent(renderer);
+            renderer.setAction(PlayerAnimator.Action.IDLE);
+            renderer.setDirection(PlayerAnimator.Direction.DOWN);
+            player.transform.scale.set(0.5f, 0.5f);
+        }
     }
 
     @Override
@@ -42,7 +47,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
     @Override
     public void onDisconnect(int closeCode, String reason) {
-        // Clean up all other players when disconnecting
+        // Limpiar todos los otros jugadores al desconectarse
         for (GameObject otherPlayer : otherPlayers.values()) {
             GameObject.Destroy(otherPlayer);
         }
@@ -52,15 +57,17 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     @Override
     public void onMessage(ServerMessage message) {
         if (!active) return;
+
         if (message.type.equals("update")) {
             JsonValue data = message.data;
-            // Update client player position
+
+            // Actualizar al jugador local
             if (data.has("clientPlayer")) {
                 JsonValue clientPlayerData = data.get("clientPlayer");
                 updatePlayerPosition(player, clientPlayerData);
             }
 
-            // Update other players
+            // Actualizar a otros jugadores
             if (data.has("otherPlayers")) {
                 JsonValue otherPlayersArray = data.get("otherPlayers");
                 updateOtherPlayers(otherPlayersArray);
@@ -79,33 +86,37 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     }
 
     private void updateOtherPlayers(JsonValue otherPlayersArray) {
-        // Create a set of current player IDs
         Set<String> currentPlayerIds = new HashSet<>();
-        // Update or create other players
+
         for (JsonValue playerData : otherPlayersArray) {
             String playerId = playerData.getString("id");
             currentPlayerIds.add(playerId);
-            Gdx.app.log("PlayerManager", "Updating player " + playerId);
             GameObject otherPlayer = otherPlayers.get(playerId);
+
             if (otherPlayer == null) {
-                Gdx.app.log("PlayerManager", "Creating new player");
-                // Create new player using instantiate
                 float x = playerData.getFloat("x");
                 float y = playerData.getFloat("y");
+
                 GameObject newPlayer = new GameObject("player " + playerId);
-                newPlayer.addComponent(new TextureRenderer(playerTexture));
+                PlayerRenderer renderer = new PlayerRenderer();
+                newPlayer.addComponent(renderer);
+                renderer.setAction(PlayerAnimator.Action.IDLE);
+                renderer.setDirection(PlayerAnimator.Direction.DOWN);
+
                 newPlayer.addComponent(new Player(playerId));
                 newPlayer.transform.position = new Vector2(x, y);
-                newPlayer.transform.scale.set(0.5f,0.5f);
+                newPlayer.transform.scale.set(0.5f, 0.5f);
                 SceneSystem.activeScene.addGameObject(newPlayer);
                 otherPlayers.put(playerId, newPlayer);
 
+                Gdx.app.log("PlayerManager", "Created new player: " + playerId);
             } else {
-                // Update position of existing player
+                // Actualizar posición del jugador existente
                 updatePlayerPosition(otherPlayer, playerData);
             }
         }
-        // Remove disconnected players
+
+        // Eliminar jugadores que se han desconectado
         otherPlayers.entrySet().removeIf(entry -> {
             if (!currentPlayerIds.contains(entry.getKey())) {
                 GameObject.Destroy(entry.getValue());

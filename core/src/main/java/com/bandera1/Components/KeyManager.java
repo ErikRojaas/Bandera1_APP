@@ -27,7 +27,7 @@ public class KeyManager extends Component implements WebSocketEventListener {
     public void init() {
         keys = new HashMap<>();
         ServerUtils.instance.addListener(this);
-        keyTexture = new Texture("key.jpg");
+        keyTexture = new Texture("key.png");
     }
 
     @Override

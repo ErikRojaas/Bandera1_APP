@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 
 
 public class SceneSystem {
@@ -45,6 +47,8 @@ public class SceneSystem {
     }
 
     public void render(SpriteBatch batch) {
+        Gdx.gl.glClearColor(0, 0, 0, 1); // Black background
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         batch.setProjectionMatrix(SceneSystem.camera.combined);
         if (activeScene != null) {
@@ -114,8 +118,6 @@ public class SceneSystem {
         width = w;
         height = h;
         viewport.update(width, height, true);
-        camera.viewportWidth = width;
-        camera.viewportHeight = height;
         camera.update();
     }
 }

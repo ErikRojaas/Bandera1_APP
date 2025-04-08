@@ -17,17 +17,17 @@ public class Main extends ApplicationAdapter {
     public CollisionSystem collisionSystem;
     public ServerUtils serverUtils;
 
-    private static final String SERVER_HOST = "wss://bandera1.ieti.site:443";
+    private static final String SERVER_HOST = "wss://bandera1.ieti.site:443?type=mobile";
 
     @Override
     public void create() {
         batch = new SpriteBatch();
+        serverUtils = new ServerUtils(SERVER_HOST);
         sceneSystem = new SceneSystem(800, 480);
         inputSystem = new InputSystem();
         Gdx.input.setInputProcessor(inputSystem);
         collisionSystem = new CollisionSystem();
-        
-        serverUtils = new ServerUtils(SERVER_HOST);
+
         serverUtils.connect();
     }
 
@@ -40,6 +40,7 @@ public class Main extends ApplicationAdapter {
         //Update phase
         sceneSystem.update();
         //Render phase
+        sceneSystem.viewport.apply();
         sceneSystem.render(batch);
         // Clear input state
         InputSystem.update();

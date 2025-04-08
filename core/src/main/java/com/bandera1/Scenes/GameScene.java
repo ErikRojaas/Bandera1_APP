@@ -11,6 +11,10 @@ import com.badlogic.gdx.graphics.Texture;
 public class GameScene extends Scene {
     public GameScene() {
         super();
+        GameObject gameManger = new GameObject("gameManager");
+        gameManger.addComponent(new PlayerManager());
+        addGameObject(gameManger);
+
         GameObject background = new GameObject("background");
         background.addComponent(new TextureRenderer(new Texture("background.png")));
         addGameObject(background);
@@ -18,12 +22,11 @@ public class GameScene extends Scene {
         GameObject player = new GameObject("player");
         player.addComponent(new TextureRenderer(new Texture("player.png")));
         player.addComponent(new Player());
-        player.addComponent(new FollowCamera());
+        player.transform.scale.set(0.5f,0.5f);
         player.addComponent(new PlayerMovement());
+        player.addComponent(new FollowCamera());
         addGameObject(player);
 
-        GameObject gameManger = new GameObject("gameManager");
-        gameManger.addComponent(new PlayerManager());
-        addGameObject(gameManger);
+
     }
 }

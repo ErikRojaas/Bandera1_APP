@@ -1,6 +1,7 @@
 package com.bandera1.Utils;
 
 import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.JsonWriter;
 
 public class ServerMessage {
     public String type;
@@ -15,6 +16,6 @@ public class ServerMessage {
 
     @Override
     public String toString() {
-        return "{\"type\":\"" + type + "\",\"data\":" + data.toString() + "}";
+        return "{\"type\":\"" + type + "\",\"data\":" + data.toJson(JsonWriter.OutputType.json) + "}";
     }
 }

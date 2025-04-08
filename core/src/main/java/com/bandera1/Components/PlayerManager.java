@@ -4,6 +4,7 @@ import com.bandera1.Utils.ServerMessage;
 import com.bandera1.Utils.ServerUtils;
 import com.bandera1.Utils.WebSocketEventListener;
 import com.bandera1.Engine.GameObjects.GameObject;
+import com.bandera1.Engine.GameObjects.Scene;
 import com.bandera1.Engine.GameObjects.TextureRenderer;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,22 +14,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+import com.bandera1.Engine.Systems.SceneSystem;
 
 import com.bandera1.Engine.GameObjects.Component;
 
 public class PlayerManager extends Component implements WebSocketEventListener {
     private GameObject player;
     private Map<String, GameObject> otherPlayers;
-    private GameObject playerPrefab;
 
     @Override
     public void init() {
         ServerUtils.instance.addListener(this);
         otherPlayers = new HashMap<>();
-        playerPrefab = new GameObject("player");
-        playerPrefab.addComponent(new Player());
-        playerPrefab.addComponent(new TextureRenderer(new Texture("player.png")));
-        //not adding moving component
     }
 
     @Override
@@ -71,33 +68,38 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             float x = playerData.getFloat("x");
             float y = playerData.getFloat("y");
             player.transform.position = new Vector2(x, y);
+        } else {
+            Gdx.app.log("PlayerManager", "Player or playerData is null");
         }
     }
 
     private void updateOtherPlayers(JsonValue otherPlayersArray) {
         // Create a set of current player IDs
         Set<String> currentPlayerIds = new HashSet<>();
-        
         // Update or create other players
         for (JsonValue playerData : otherPlayersArray) {
             String playerId = playerData.getString("id");
             currentPlayerIds.add(playerId);
-            
+            Gdx.app.log("PlayerManager", "Updating player " + playerId);
             GameObject otherPlayer = otherPlayers.get(playerId);
             if (otherPlayer == null) {
+                Gdx.app.log("PlayerManager", "Creating new player");
                 // Create new player using instantiate
                 float x = playerData.getFloat("x");
                 float y = playerData.getFloat("y");
-                otherPlayer = GameObject.instantiate(playerPrefab, new Vector2(x, y));
-                if (otherPlayer != null) {
-                    otherPlayers.put(playerId, otherPlayer);
-                }
+                GameObject newPlayer = new GameObject("player " + playerId);
+                newPlayer.addComponent(new TextureRenderer(new Texture("player.png")));
+                newPlayer.addComponent(new Player(playerId));
+                newPlayer.transform.position = new Vector2(x, y);
+                newPlayer.transform.scale.set(0.5f,0.5f);
+                SceneSystem.activeScene.addGameObject(newPlayer);
+                otherPlayers.put(playerId, newPlayer);
+
             } else {
                 // Update position of existing player
                 updatePlayerPosition(otherPlayer, playerData);
             }
         }
-        
         // Remove disconnected players
         otherPlayers.entrySet().removeIf(entry -> {
             if (!currentPlayerIds.contains(entry.getKey())) {

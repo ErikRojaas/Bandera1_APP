@@ -110,8 +110,8 @@ public class GameObject implements Serializable {
 
     public static GameObject instantiate(GameObject gameObject, Vector2 position, float rotation) {
         GameObject clone = gameObject.deepClone();
-        gameObject.transform.position = position;
-        gameObject.transform.rotation = rotation;
+        clone.transform.position = position;
+        clone.transform.rotation = rotation;
         for (Component component : clone.components) {
             component.gameObject = clone;
             component.init();
@@ -123,7 +123,7 @@ public class GameObject implements Serializable {
 
     public static GameObject instantiate(GameObject gameObject, float rotation) {
         GameObject clone = gameObject.deepClone();
-        gameObject.transform.rotation = rotation;
+        clone.transform.rotation = rotation;
         for (Component component : clone.components) {
             component.gameObject = clone;
             component.init();
@@ -135,7 +135,7 @@ public class GameObject implements Serializable {
 
     public static GameObject instantiate(GameObject gameObject, Vector2 position) {
         GameObject clone = gameObject.deepClone();
-        gameObject.transform.position = position;
+        clone.transform.position = position;
         for (Component component : clone.components) {
             component.gameObject = clone;
             component.init();

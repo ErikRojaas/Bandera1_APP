@@ -18,8 +18,8 @@ public class PlayerAnimator {
         UP, DOWN, LEFT, RIGHT
     }
 
-    private static final int FRAME_WIDTH = 160;  // Cambiar según el tamaño real de cada frame
-    private static final int FRAME_HEIGHT = 160;
+    private static final int FRAME_WIDTH = 80;  // Cambiar según el tamaño real de cada frame
+    private static final int FRAME_HEIGHT = 80;
 
     private final Map<Action, TextureRegion[][]> animationsRaw = new HashMap<>();
     private final Map<Action, Map<Direction, Animation<TextureRegion>>> animations = new HashMap<>();

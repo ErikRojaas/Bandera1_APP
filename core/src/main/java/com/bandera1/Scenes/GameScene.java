@@ -39,7 +39,7 @@ public class GameScene extends Scene {
         player.addComponent(new PlayerMovement());
         //player.addComponent(new TextureRenderer(new Texture("player.png")));
         player.addComponent(new Player());
-        player.transform.scale.set(2f,2f);
+        player.transform.scale.set(4f,4f);
         player.addComponent(new FollowCamera());
 
         addGameObject(player);

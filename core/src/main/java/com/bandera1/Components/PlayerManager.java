@@ -96,7 +96,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                 newPlayer.addComponent(new Player(playerId));
                 newPlayer.addComponent(new TextureRenderer(playerTexture));
                 newPlayer.transform.position = new Vector2(x, y);
-                newPlayer.transform.scale.set(2f, 2f);
+                newPlayer.transform.scale.set(4f, 4f);
                 SceneSystem.activeScene.addGameObject(newPlayer);
                 otherPlayers.put(playerId, newPlayer);
 

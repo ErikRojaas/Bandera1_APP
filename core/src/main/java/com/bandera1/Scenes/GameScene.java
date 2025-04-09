@@ -27,7 +27,7 @@ public class GameScene extends Scene {
 
         GameObject player = new GameObject("player");
 
-        PlayerAnimator animator = new PlayerAnimator();
+        /*PlayerAnimator animator = new PlayerAnimator();
         AnimationRenderer animationRenderer = new AnimationRenderer();
         for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
             for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
@@ -35,10 +35,11 @@ public class GameScene extends Scene {
             }
         }
         animationRenderer.play("IDLE_DOWN");
-        player.addComponent(new Player());
-        player.transform.scale.set(0.5f,0.5f);
+        player.addComponent(animationRenderer);*/
         player.addComponent(new PlayerMovement());
-        player.addComponent(animationRenderer);
+        player.addComponent(new TextureRenderer(new Texture("player.png")));
+        player.addComponent(new Player());
+        player.transform.scale.set(2f,2f);
         player.addComponent(new FollowCamera());
 
         addGameObject(player);

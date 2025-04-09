@@ -38,7 +38,7 @@ public class PlayerMovement extends Component {
             Gdx.app.log("PlayerMovement",directionJson.toString());
             //send the direction to the server
             server.send(new ServerMessage("direction", data));
-            handleWalkAnimation(x, y);
+            //handleWalkAnimation(x, y);
         } else if (InputSystem.onTouchUp(0)) {
             //stop moving
             JsonValue data = new JsonValue(JsonValue.ValueType.object);
@@ -49,7 +49,7 @@ public class PlayerMovement extends Component {
             server.send(new ServerMessage("direction", data));
             float x = InputSystem.getTouchX();
             float y = InputSystem.getTouchY();
-            handleIdleAnimation(x, y);
+            //handleIdleAnimation(x, y);
         }
     }
 

@@ -1,12 +1,16 @@
 package com.bandera1.Scenes;
 
+import com.bandera1.Engine.GameObjects.AnimationRenderer;
 import com.bandera1.Engine.GameObjects.GameObject;
 import com.bandera1.Engine.GameObjects.Scene;
 import com.bandera1.Engine.GameObjects.TextureRenderer;
 import com.bandera1.Components.*;
 
+import java.util.Map;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class GameScene extends Scene {
     public GameScene() {
@@ -18,14 +22,25 @@ public class GameScene extends Scene {
 
         GameObject background = new GameObject("background");
         background.addComponent(new TextureRenderer(new Texture("background.png")));
+        background.transform.scale.set(0.8f, 0.8f);
         addGameObject(background);
 
         GameObject player = new GameObject("player");
-        player.addComponent(new TextureRenderer(new Texture("player.png")));
+
+        PlayerAnimator animator = new PlayerAnimator();
+        AnimationRenderer animationRenderer = new AnimationRenderer();
+        for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
+            for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
+                animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
+            }
+        }
+        animationRenderer.play("IDLE_DOWN");
         player.addComponent(new Player());
         player.transform.scale.set(0.5f,0.5f);
         player.addComponent(new PlayerMovement());
+        player.addComponent(animationRenderer);
         player.addComponent(new FollowCamera());
+
         addGameObject(player);
     }
 }

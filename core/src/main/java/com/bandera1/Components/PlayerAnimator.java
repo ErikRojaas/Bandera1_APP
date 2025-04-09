@@ -38,9 +38,16 @@ public class PlayerAnimator {
     private void loadSpriteSheet(Action action, String path) {
         Texture texture = new Texture(Gdx.files.internal(path));
         texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-        int rows = 4;
-        int cols = texture.getWidth() / FRAME_WIDTH;
+
+        // Split the texture into a 2D array of frames
+        // First dimension is rows (directions: down, left, right, up)
+        // Second dimension is columns (animation frames)
         TextureRegion[][] frames = TextureRegion.split(texture, FRAME_WIDTH, FRAME_HEIGHT);
+
+        // Debug output to check dimensions
+        Gdx.app.debug("PlayerAnimator", "Loaded " + path + " with " + frames.length +
+                      " rows and " + (frames.length > 0 ? frames[0].length : 0) + " columns");
+
         animationsRaw.put(action, frames);
     }
 
@@ -49,10 +56,22 @@ public class PlayerAnimator {
             TextureRegion[][] sheet = animationsRaw.get(action);
             Map<Direction, Animation<TextureRegion>> map = new HashMap<>();
 
-            map.put(Direction.UP, createAnimation(sheet[0]));
-            map.put(Direction.DOWN, createAnimation(sheet[1]));
-            map.put(Direction.LEFT, createAnimation(sheet[2]));
-            map.put(Direction.RIGHT, createAnimation(sheet[3]));
+            // Check if we have enough rows in the sheet
+            if (sheet.length >= 4) {
+                map.put(Direction.DOWN, createAnimation(sheet[0]));
+                map.put(Direction.LEFT, createAnimation(sheet[1]));
+                map.put(Direction.RIGHT, createAnimation(sheet[2]));
+                map.put(Direction.UP, createAnimation(sheet[3]));
+            } else {
+                Gdx.app.error("PlayerAnimator", "Sprite sheet for " + action +
+                              " doesn't have enough rows (" + sheet.length + ")");
+
+                // Use what's available or create empty animations
+                if (sheet.length > 0) map.put(Direction.DOWN, createAnimation(sheet[0]));
+                if (sheet.length > 1) map.put(Direction.LEFT, createAnimation(sheet[1]));
+                if (sheet.length > 2) map.put(Direction.RIGHT, createAnimation(sheet[2]));
+                if (sheet.length > 3) map.put(Direction.UP, createAnimation(sheet[3]));
+            }
 
             animations.put(action, map);
         }

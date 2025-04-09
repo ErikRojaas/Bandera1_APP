@@ -30,7 +30,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     @Override
     public void start() {
         active = true;
-        player = GameObject.Find("player");
+        /*player = GameObject.Find("player");
 
         // Añadimos el PlayerRenderer al jugador local si no lo tiene ya
         if (player != null && player.getComponent(PlayerRenderer.class) == null) {
@@ -39,7 +39,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             renderer.setAction(PlayerAnimator.Action.IDLE);
             renderer.setDirection(PlayerAnimator.Direction.DOWN);
             player.transform.scale.set(0.5f, 0.5f);
-        }
+        }*/
     }
 
     @Override
@@ -98,10 +98,10 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                 float y = playerData.getFloat("y");
 
                 GameObject newPlayer = new GameObject("player " + playerId);
-                PlayerRenderer renderer = new PlayerRenderer();
-                newPlayer.addComponent(renderer);
-                renderer.setAction(PlayerAnimator.Action.IDLE);
-                renderer.setDirection(PlayerAnimator.Direction.DOWN);
+                //PlayerRenderer renderer = new PlayerRenderer();
+                //newPlayer.addComponent(renderer);
+                //renderer.setAction(PlayerAnimator.Action.IDLE);
+                //renderer.setDirection(PlayerAnimator.Direction.DOWN);
 
                 newPlayer.addComponent(new Player(playerId));
                 newPlayer.transform.position = new Vector2(x, y);

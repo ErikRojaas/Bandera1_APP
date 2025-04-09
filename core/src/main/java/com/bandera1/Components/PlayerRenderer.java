@@ -27,7 +27,7 @@ public class PlayerRenderer extends Component {
 
     @Override
     public void render(SpriteBatch batch) {
-        Animation<TextureRegion> animation = animator.getAnimation(action, direction);
+        /*Animation<TextureRegion> animation = animator.getAnimation(action, direction);
         if (animation != null) {
             TextureRegion currentFrame = animation.getKeyFrame(stateTime);
             float x = gameObject.transform.position.x;
@@ -36,7 +36,7 @@ public class PlayerRenderer extends Component {
             float height = currentFrame.getRegionHeight();
 
             batch.draw(currentFrame, x, y, width * gameObject.transform.scale.x, height * gameObject.transform.scale.y);
-        }
+        }*/
     }
 
     // Setters

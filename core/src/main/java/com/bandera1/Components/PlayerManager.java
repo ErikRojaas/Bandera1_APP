@@ -1,5 +1,7 @@
 package com.bandera1.Components;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.bandera1.Engine.GameObjects.TextureRenderer;
 import com.bandera1.Utils.ServerMessage;
 import com.bandera1.Utils.ServerUtils;
 import com.bandera1.Utils.WebSocketEventListener;
@@ -20,6 +22,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     private GameObject player;
     private Map<String, GameObject> otherPlayers;
     private boolean active;
+    private Texture playerTexture;
 
     @Override
     public void init() {
@@ -31,6 +34,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     public void start() {
         active = true;
         player = GameObject.Find("player");
+        playerTexture = new Texture("player.png");
     }
 
     @Override
@@ -90,8 +94,9 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
                 GameObject newPlayer = new GameObject("player " + playerId);
                 newPlayer.addComponent(new Player(playerId));
+                newPlayer.addComponent(new TextureRenderer(playerTexture));
                 newPlayer.transform.position = new Vector2(x, y);
-                newPlayer.transform.scale.set(0.5f, 0.5f);
+                newPlayer.transform.scale.set(2f, 2f);
                 SceneSystem.activeScene.addGameObject(newPlayer);
                 otherPlayers.put(playerId, newPlayer);
 

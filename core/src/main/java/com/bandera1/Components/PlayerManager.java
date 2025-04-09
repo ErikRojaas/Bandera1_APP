@@ -81,16 +81,23 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
     private void updatePlayer(GameObject player, JsonValue playerData, boolean isLocal) {
         if (player != null && playerData != null) {
-            //Update position
+
             float x = playerData.getFloat("x");
             float y = playerData.getFloat("y");
             JsonValue moveVector = playerData.get("moveVector");
             float dx = moveVector.getFloat("dx");
             float dy = moveVector.getFloat("dy");
-            player.transform.position = new Vector2(x, y);
-            AnimationRenderer animationRenderer = (AnimationRenderer) player.getComponent(AnimationRenderer.class);
+            //Update position
+            PositionSync positionSync = player.getComponent(PositionSync.class);
+            positionSync.setTargetPosition(x,y);
+            if (dx == 0 && dy == 0) {
+                positionSync.snap = true;
+            } else {
+                positionSync.snap = false;
+            }
             if (isLocal) return;
             //Update animation
+            AnimationRenderer animationRenderer = (AnimationRenderer) player.getComponent(AnimationRenderer.class);
             if (dx == 0 && dy == 0) {
                 String playedAnimation = animationRenderer.currentAnimationName;
                 //change WALK_DIR to IDLE_DIR
@@ -134,7 +141,8 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                 GameObject newPlayer = new GameObject("player " + playerId);
                 newPlayer.addComponent(new Player(playerId));
                 newPlayer.addComponent(animationRenderer);
-                newPlayer.transform.position = new Vector2(x, y);
+                newPlayer.addComponent(new PositionSync());
+                newPlayer.transform.position.set(x, y);
                 newPlayer.transform.scale.set(2f, 2f);
 
                 JsonValue moveVector = playerData.get("moveVector");

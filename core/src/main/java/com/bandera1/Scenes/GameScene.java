@@ -37,6 +37,7 @@ public class GameScene extends Scene {
         animationRenderer.play("IDLE_DOWN");
         player.addComponent(animationRenderer);
         player.addComponent(new PlayerMovement());
+        player.addComponent(new PositionSync());
         //player.addComponent(new TextureRenderer(new Texture("player.png")));
         player.addComponent(new Player());
         player.transform.scale.set(2f,2f);

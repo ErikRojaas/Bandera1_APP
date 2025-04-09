@@ -18,8 +18,8 @@ public class PlayerAnimator {
         UP, DOWN, LEFT, RIGHT
     }
 
-    private static final int FRAME_WIDTH = 64;  // Cambiar según el tamaño real de cada frame
-    private static final int FRAME_HEIGHT = 64;
+    private static final int FRAME_WIDTH = 160;  // Cambiar según el tamaño real de cada frame
+    private static final int FRAME_HEIGHT = 160;
 
     private final Map<Action, TextureRegion[][]> animationsRaw = new HashMap<>();
     private final Map<Action, Map<Direction, Animation<TextureRegion>>> animations = new HashMap<>();
@@ -59,18 +59,18 @@ public class PlayerAnimator {
             // Check if we have enough rows in the sheet
             if (sheet.length >= 4) {
                 map.put(Direction.DOWN, createAnimation(sheet[0]));
-                map.put(Direction.LEFT, createAnimation(sheet[1]));
-                map.put(Direction.RIGHT, createAnimation(sheet[2]));
-                map.put(Direction.UP, createAnimation(sheet[3]));
+                map.put(Direction.UP, createAnimation(sheet[1]));
+                map.put(Direction.LEFT, createAnimation(sheet[2]));
+                map.put(Direction.RIGHT, createAnimation(sheet[3]));
             } else {
                 Gdx.app.error("PlayerAnimator", "Sprite sheet for " + action +
                               " doesn't have enough rows (" + sheet.length + ")");
 
                 // Use what's available or create empty animations
                 if (sheet.length > 0) map.put(Direction.DOWN, createAnimation(sheet[0]));
-                if (sheet.length > 1) map.put(Direction.LEFT, createAnimation(sheet[1]));
-                if (sheet.length > 2) map.put(Direction.RIGHT, createAnimation(sheet[2]));
-                if (sheet.length > 3) map.put(Direction.UP, createAnimation(sheet[3]));
+                if (sheet.length > 1) map.put(Direction.UP, createAnimation(sheet[1]));
+                if (sheet.length > 2) map.put(Direction.LEFT, createAnimation(sheet[2]));
+                if (sheet.length > 3) map.put(Direction.RIGHT, createAnimation(sheet[3]));
             }
 
             animations.put(action, map);

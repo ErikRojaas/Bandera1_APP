@@ -1,5 +1,6 @@
 package com.bandera1.Components;
 
+import com.bandera1.Engine.GameObjects.AnimationRenderer;
 import com.bandera1.Engine.GameObjects.Component;
 import com.bandera1.Engine.GameObjects.GameObject;
 import com.bandera1.Utils.ServerMessage;
@@ -22,12 +23,14 @@ public class KeyManager extends Component implements WebSocketEventListener {
     Map<String, GameObject> keys;
     boolean active;
     Texture keyTexture;
+    KeyAnimator animator;
 
     @Override
     public void init() {
         keys = new HashMap<>();
         ServerUtils.instance.addListener(this);
-        keyTexture = new Texture("key.png");
+        animator = new KeyAnimator();
+        //keyTexture = new Texture("key.png");
     }
 
     @Override
@@ -63,10 +66,14 @@ public class KeyManager extends Component implements WebSocketEventListener {
                 key.transform.position = new Vector2(keyData.getFloat("x"), keyData.getFloat("y"));
             } else {
                 GameObject key = new GameObject("key " + keyId);
-                key.addComponent(new TextureRenderer(keyTexture));
+                AnimationRenderer renderer = new AnimationRenderer();
+                renderer.addAnimation("idle", animator.getAnimation());
+                renderer.play("idle");
+
+                key.addComponent(renderer);
                 key.addComponent(new Key());
                 key.transform.position = new Vector2(keyData.getFloat("x"), keyData.getFloat("y"));
-                key.transform.scale.set(0.5f,0.5f);
+                key.transform.scale.set(2f,2f);
                 SceneSystem.activeScene.addGameObject(key);
                 Gdx.app.log("KeyManager", "Creating new key");
                 keys.put(keyId, key);

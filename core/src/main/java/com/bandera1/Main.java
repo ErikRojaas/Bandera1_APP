@@ -37,6 +37,7 @@ public class Main extends ApplicationAdapter {
         collisionSystem.checkCollisions();
         collisionSystem.dispatchCollisionEvents();
         //Update phase
+        serverUtils.update();
         sceneSystem.update();
         //Render phase
         SceneSystem.viewport.apply();

@@ -10,9 +10,9 @@ public class PositionSync extends Component {
     public Vector2 targetPosition = new Vector2(0,0);
     public Transform transform;
     public Vector2 velocity = new Vector2(0,0);
-    public float syncThreshold = 500f;
-    public float lerpThreshold = 100f;
-    public float snapThreshold = 10.0f;
+    public float syncThreshold = 1000f;
+    public float lerpThreshold = 500f;
+    public float snapThreshold = 1f;
     public boolean snap = false;
 
     @Override

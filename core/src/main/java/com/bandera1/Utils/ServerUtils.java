@@ -6,6 +6,7 @@ import com.github.czyzby.websocket.WebSocketListener;
 import com.github.czyzby.websocket.WebSockets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -15,6 +16,7 @@ public class ServerUtils implements WebSocketListener {
     private WebSocket socket;
     private boolean connected = false;
     private List<WebSocketEventListener> listeners = new ArrayList<>();
+    ConcurrentLinkedQueue<ServerMessage> messages = new ConcurrentLinkedQueue<>();
 
     public ServerUtils(String url) {
         socket = WebSockets.newSocket(url);
@@ -22,30 +24,26 @@ public class ServerUtils implements WebSocketListener {
         instance = this;
     }
 
-    /**
-     * Adds a new WebSocketEventListener to receive WebSocket events.
-     * If the listener is already registered, it won't be added again.
-     * 
-     * @param listener The listener to add
-     */
     public void addListener(WebSocketEventListener listener) {
         if (listener != null && !listeners.contains(listener)) {
             listeners.add(listener);
         }
     }
 
-    /**
-     * Removes a WebSocketEventListener from the registered listeners.
-     * 
-     * @param listener The listener to remove
-     */
+    public void update() {
+        ServerMessage message;
+        while((message = messages.poll()) != null) {
+            for (WebSocketEventListener listener : listeners) {
+                listener.onMessage(message);
+            }
+        }
+        messages.clear();
+    }
+
     public void removeListener(WebSocketEventListener listener) {
         listeners.remove(listener);
     }
 
-    /**
-     * Removes all registered WebSocketEventListeners.
-     */
     public void clearListeners() {
         listeners.clear();
     }
@@ -101,14 +99,12 @@ public class ServerUtils implements WebSocketListener {
 
         JsonReader reader = new JsonReader();
         JsonValue root = reader.parse(packet);
-    
+
         ServerMessage message = new ServerMessage();
         message.type = root.getString("type");
         message.data = root.get("data");
 
-        for (WebSocketEventListener listener : listeners) {            
-            listener.onMessage(message);
-        }
+        messages.add(message);
         return false;
     }
 

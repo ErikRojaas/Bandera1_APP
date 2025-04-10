@@ -122,35 +122,49 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             Gdx.app.log("PlayerManager", "Player or playerData is null");
         }
     }
-
     private void updateOtherPlayers(JsonValue otherPlayersArray) {
         Set<String> currentPlayerIds = new HashSet<>();
-
+    
         for (JsonValue playerData : otherPlayersArray) {
             String playerId = playerData.getString("id");
+            int skinId = playerData.has("skinId") ? playerData.getInt("skinId") : 1; // por defecto Character1
             currentPlayerIds.add(playerId);
             GameObject otherPlayer = otherPlayers.get(playerId);
-
+    
             if (otherPlayer == null) {
                 float x = playerData.getFloat("x");
                 float y = playerData.getFloat("y");
-
-                AnimationRenderer animationRenderer = new AnimationRenderer();
-                for (Map.Entry<String, Animation<TextureRegion>> entry : animations.entrySet()) {
-                    animationRenderer.addAnimation(entry.getKey(), entry.getValue());
+    
+                // Crear animador personalizado con la skin
+                PlayerAnimator animator = new PlayerAnimator("Characters/Character" + skinId + "/");
+    
+                // Frame inicial
+                Animation<TextureRegion> initialAnimation = animator.getAnimation(PlayerAnimator.Action.IDLE, PlayerAnimator.Direction.DOWN);
+                TextureRegion initialFrame = initialAnimation.getKeyFrame(0);
+                AnimationRenderer animationRenderer = new AnimationRenderer(initialFrame);
+    
+                // Agregar todas las animaciones
+                for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
+                    for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
+                        Animation<TextureRegion> anim = animator.getAnimation(action, direction);
+                        animationRenderer.addAnimation(action.name() + "_" + direction.name(), anim);
+                    }
                 }
+    
+                // Crear GameObject del jugador
                 GameObject newPlayer = new GameObject("player " + playerId);
                 newPlayer.addComponent(new Player(playerId));
                 newPlayer.addComponent(animationRenderer);
                 newPlayer.addComponent(new PositionSync());
                 newPlayer.transform.position.set(x, y);
-                newPlayer.transform.scale.set(2f, 2f);
-
+                newPlayer.transform.scale.set(4f, 4f);
+    
+                // Inicializar animación correcta según dirección
                 JsonValue moveVector = playerData.get("moveVector");
                 float dx = moveVector.getFloat("dx");
                 float dy = moveVector.getFloat("dy");
-                //Initial animation
-                if (Math.abs(x) > Math.abs(y)) {
+    
+                if (Math.abs(dx) > Math.abs(dy)) {
                     if (dx > 0) {
                         animationRenderer.play("IDLE_RIGHT");
                     } else {
@@ -163,18 +177,16 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                         animationRenderer.play("IDLE_UP");
                     }
                 }
-
-
+    
                 SceneSystem.activeScene.addGameObject(newPlayer);
                 otherPlayers.put(playerId, newPlayer);
                 Gdx.app.log("PlayerManager", "Created new player: " + playerId);
             } else {
-                // Actualizar posición del jugador existente
                 updatePlayer(otherPlayer, playerData, false);
             }
         }
-
-        // Eliminar jugadores que se han desconectado
+    
+        // Eliminar jugadores desconectados
         otherPlayers.entrySet().removeIf(entry -> {
             if (!currentPlayerIds.contains(entry.getKey())) {
                 GameObject.Destroy(entry.getValue());
@@ -183,6 +195,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             return false;
         });
     }
+    
 
     @Override
     public void onBinaryMessage(byte[] data) {}

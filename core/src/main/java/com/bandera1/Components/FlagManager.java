@@ -21,7 +21,7 @@ public class FlagManager extends Component implements WebSocketEventListener {
     private Map<String, GameObject> flags;
     private boolean active;
     FlagAnimator animator;
-    
+
     @Override
     public void init() {
         flags = new HashMap<>();
@@ -67,7 +67,7 @@ public class FlagManager extends Component implements WebSocketEventListener {
                 renderer.play("idle");
 
                 flag.addComponent(renderer);
-                flag.addComponent(new Flag()); // Clase vacía para identificar el objeto
+                flag.addComponent(new Flag()); 
                 flag.transform.position = new Vector2(flagData.getFloat("x"), flagData.getFloat("y"));
                 flag.transform.scale.set(2, 2f);
 

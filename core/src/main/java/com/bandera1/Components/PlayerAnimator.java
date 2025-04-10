@@ -18,19 +18,25 @@ public class PlayerAnimator {
         UP, DOWN, LEFT, RIGHT
     }
 
-    private static final int FRAME_WIDTH = 80;  // Cambiar según el tamaño real de cada frame
+    private static final int FRAME_WIDTH = 80;  // Ajusta si cambia el tamaño real
     private static final int FRAME_HEIGHT = 80;
 
     private final Map<Action, TextureRegion[][]> animationsRaw = new HashMap<>();
     private final Map<Action, Map<Direction, Animation<TextureRegion>>> animations = new HashMap<>();
 
+    // Constructor por defecto (usa Character1)
     public PlayerAnimator() {
-        loadSpriteSheet(Action.IDLE, "Character/Char1_Idle.png");
-        loadSpriteSheet(Action.WALK, "Character/Char1_Walk.png");
-        loadSpriteSheet(Action.CARRY_IDLE, "Character/Char1_Carry_Idle.png");
-        loadSpriteSheet(Action.CARRY_WALK, "Character/Char1_Carry_Walk.png");
-        loadSpriteSheet(Action.ATTACK, "Character/Char1_Attack.png");
-        loadSpriteSheet(Action.DEATH, "Character/Char1_Death.png");
+        this("Characters/Character1/");
+    }
+
+    // Constructor que permite cargar cualquier carpeta
+    public PlayerAnimator(String basePath) {
+        loadSpriteSheet(Action.IDLE, basePath + "Char_Idle.png");
+        loadSpriteSheet(Action.WALK, basePath + "Char_Walk.png");
+        loadSpriteSheet(Action.CARRY_IDLE, basePath + "Char_Carry_Idle.png");
+        loadSpriteSheet(Action.CARRY_WALK, basePath + "Char_Carry_Walk.png");
+        loadSpriteSheet(Action.ATTACK, basePath + "Char_Attack.png");
+        loadSpriteSheet(Action.DEATH, basePath + "Char_Death.png");
 
         generateAnimations();
     }
@@ -39,12 +45,8 @@ public class PlayerAnimator {
         Texture texture = new Texture(Gdx.files.internal(path));
         texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        // Split the texture into a 2D array of frames
-        // First dimension is rows (directions: down, left, right, up)
-        // Second dimension is columns (animation frames)
         TextureRegion[][] frames = TextureRegion.split(texture, FRAME_WIDTH, FRAME_HEIGHT);
 
-        // Debug output to check dimensions
         Gdx.app.debug("PlayerAnimator", "Loaded " + path + " with " + frames.length +
                       " rows and " + (frames.length > 0 ? frames[0].length : 0) + " columns");
 
@@ -56,7 +58,6 @@ public class PlayerAnimator {
             TextureRegion[][] sheet = animationsRaw.get(action);
             Map<Direction, Animation<TextureRegion>> map = new HashMap<>();
 
-            // Check if we have enough rows in the sheet
             if (sheet.length >= 4) {
                 map.put(Direction.DOWN, createAnimation(sheet[0]));
                 map.put(Direction.UP, createAnimation(sheet[1]));
@@ -65,8 +66,6 @@ public class PlayerAnimator {
             } else {
                 Gdx.app.error("PlayerAnimator", "Sprite sheet for " + action +
                               " doesn't have enough rows (" + sheet.length + ")");
-
-                // Use what's available or create empty animations
                 if (sheet.length > 0) map.put(Direction.DOWN, createAnimation(sheet[0]));
                 if (sheet.length > 1) map.put(Direction.UP, createAnimation(sheet[1]));
                 if (sheet.length > 2) map.put(Direction.LEFT, createAnimation(sheet[2]));

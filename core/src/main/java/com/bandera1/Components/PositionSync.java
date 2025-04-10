@@ -27,16 +27,11 @@ public class PositionSync extends Component {
         float delta = Gdx.graphics.getDeltaTime();
         transform.translate(velocity.x * delta, velocity.y * delta);
 
-        float discrepancy = transform.position.dst(velocity);
+        float discrepancy = transform.position.dst(targetPosition);
 
         if (discrepancy > syncThreshold) {
             transform.position.set(targetPosition);
-        } else if (discrepancy > lerpThreshold) {
-            transform.position.lerp(targetPosition, Gdx.graphics.getDeltaTime());
         }
 
-        if (snap && discrepancy < snapThreshold) {
-            transform.position.set(targetPosition);
-        }
     }
 }

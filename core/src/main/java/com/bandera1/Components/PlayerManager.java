@@ -26,7 +26,6 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     private GameObject player;
     private Map<String, GameObject> otherPlayers;
     private boolean active;
-    private Map<String, Animation<TextureRegion>> animations = new HashMap<>();
 
     @Override
     public void init() {
@@ -38,12 +37,6 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     public void start() {
         active = true;
         player = GameObject.Find("player");
-        PlayerAnimator animator = new PlayerAnimator();
-        for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
-            for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
-                animations.put(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
-            }
-        }
     }
 
     @Override
@@ -51,7 +44,6 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
     @Override
     public void onDisconnect(int closeCode, String reason) {
-        // Limpiar todos los otros jugadores al desconectarse
         for (GameObject otherPlayer : otherPlayers.values()) {
             GameObject.Destroy(otherPlayer);
         }
@@ -65,13 +57,27 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         if (message.type.equals("update")) {
             JsonValue data = message.data;
 
-            // Actualizar al jugador local
             if (data.has("clientPlayer")) {
                 JsonValue clientPlayerData = data.get("clientPlayer");
+
+                if (player.getComponent(AnimationRenderer.class) == null) {
+                    int skinId = clientPlayerData.has("skinId") ? clientPlayerData.getInt("skinId") : 1;
+                    PlayerAnimator animator = new PlayerAnimator("Characters/Character" + skinId + "/");
+                    Gdx.app.log("PlayerManager", "Local player skinId = " + skinId);
+                    Animation<TextureRegion> idleDownAnim = animator.getAnimation(PlayerAnimator.Action.IDLE, PlayerAnimator.Direction.DOWN);
+                    TextureRegion initialFrame = idleDownAnim.getKeyFrame(0);
+                    AnimationRenderer animationRenderer = new AnimationRenderer(initialFrame);                    for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
+                        for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
+                            animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
+                        }
+                    }
+                    animationRenderer.play("IDLE_DOWN");
+                    player.addComponent(animationRenderer);
+                }
+
                 updatePlayer(player, clientPlayerData, true);
             }
 
-            // Actualizar a otros jugadores
             if (data.has("otherPlayers")) {
                 JsonValue otherPlayersArray = data.get("otherPlayers");
                 updateOtherPlayers(otherPlayersArray);
@@ -81,103 +87,76 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
     private void updatePlayer(GameObject player, JsonValue playerData, boolean isLocal) {
         if (player != null && playerData != null) {
-
             float x = playerData.getFloat("x");
             float y = playerData.getFloat("y");
             JsonValue moveVector = playerData.get("moveVector");
             float dx = moveVector.getFloat("dx");
             float dy = moveVector.getFloat("dy");
-            //Update position
+
             PositionSync positionSync = player.getComponent(PositionSync.class);
             positionSync.targetPosition.set(x, y);
             positionSync.velocity.set(dx, dy);
-            if (dx == 0 && dy == 0) {
-                positionSync.snap = true;
-            } else {
-                positionSync.snap = false;
-            }
+            positionSync.snap = (dx == 0 && dy == 0);
+
             if (isLocal) return;
-            //Update animation
-            AnimationRenderer animationRenderer = (AnimationRenderer) player.getComponent(AnimationRenderer.class);
+
+            AnimationRenderer animationRenderer = player.getComponent(AnimationRenderer.class);
             if (dx == 0 && dy == 0) {
                 String playedAnimation = animationRenderer.currentAnimationName;
-                //change WALK_DIR to IDLE_DIR
                 if (playedAnimation.contains("WALK")) {
                     animationRenderer.play("IDLE_" + playedAnimation.substring(5));
                 }
             } else if (Math.abs(dx) > Math.abs(dy)) {
-                if (dx > 0) {
-                    animationRenderer.play("IDLE_RIGHT");
-                } else {
-                    animationRenderer.play("IDLE_LEFT");
-                }
+                animationRenderer.play(dx > 0 ? "IDLE_RIGHT" : "IDLE_LEFT");
             } else {
-                if (dy > 0) {
-                    animationRenderer.play("IDLE_DOWN");
-                } else {
-                    animationRenderer.play("IDLE_UP");
-                }
+                animationRenderer.play(dy > 0 ? "IDLE_DOWN" : "IDLE_UP");
             }
         } else {
             Gdx.app.log("PlayerManager", "Player or playerData is null");
         }
     }
+
     private void updateOtherPlayers(JsonValue otherPlayersArray) {
         Set<String> currentPlayerIds = new HashSet<>();
-    
+
         for (JsonValue playerData : otherPlayersArray) {
             String playerId = playerData.getString("id");
-            int skinId = playerData.has("skinId") ? playerData.getInt("skinId") : 1; // por defecto Character1
+            int skinId = playerData.has("skinId") ? playerData.getInt("skinId") : 1;
             currentPlayerIds.add(playerId);
             GameObject otherPlayer = otherPlayers.get(playerId);
-    
+
             if (otherPlayer == null) {
                 float x = playerData.getFloat("x");
                 float y = playerData.getFloat("y");
-    
-                // Crear animador personalizado con la skin
+
                 PlayerAnimator animator = new PlayerAnimator("Characters/Character" + skinId + "/");
-    
-                // Frame inicial
                 Animation<TextureRegion> initialAnimation = animator.getAnimation(PlayerAnimator.Action.IDLE, PlayerAnimator.Direction.DOWN);
                 TextureRegion initialFrame = initialAnimation.getKeyFrame(0);
                 AnimationRenderer animationRenderer = new AnimationRenderer(initialFrame);
-    
-                // Agregar todas las animaciones
+
                 for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
                     for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
-                        Animation<TextureRegion> anim = animator.getAnimation(action, direction);
-                        animationRenderer.addAnimation(action.name() + "_" + direction.name(), anim);
+                        animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
                     }
                 }
-    
-                // Crear GameObject del jugador
+
                 GameObject newPlayer = new GameObject("player " + playerId);
                 newPlayer.addComponent(new Player(playerId));
                 newPlayer.addComponent(animationRenderer);
                 newPlayer.addComponent(new PositionSync());
                 newPlayer.transform.position.set(x, y);
                 newPlayer.transform.scale.set(4f, 4f);
-    
-                // Inicializar animación correcta según dirección
+
                 JsonValue moveVector = playerData.get("moveVector");
                 float dx = moveVector.getFloat("dx");
                 float dy = moveVector.getFloat("dy");
-    
+
                 if (Math.abs(dx) > Math.abs(dy)) {
-                    if (dx > 0) {
-                        animationRenderer.play("IDLE_RIGHT");
-                    } else {
-                        animationRenderer.play("IDLE_LEFT");
-                    }
+                    animationRenderer.play(dx > 0 ? "IDLE_RIGHT" : "IDLE_LEFT");
                 } else {
-                    if (dy > 0) {
-                        animationRenderer.play("IDLE_DOWN");
-                    } else {
-                        animationRenderer.play("IDLE_UP");
-                    }
+                    animationRenderer.play(dy > 0 ? "IDLE_DOWN" : "IDLE_UP");
                 }
-    
+
                 SceneSystem.activeScene.addGameObject(newPlayer);
                 otherPlayers.put(playerId, newPlayer);
                 Gdx.app.log("PlayerManager", "Created new player: " + playerId);
@@ -185,8 +164,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                 updatePlayer(otherPlayer, playerData, false);
             }
         }
-    
-        // Eliminar jugadores desconectados
+
         otherPlayers.entrySet().removeIf(entry -> {
             if (!currentPlayerIds.contains(entry.getKey())) {
                 GameObject.Destroy(entry.getValue());
@@ -195,7 +173,6 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             return false;
         });
     }
-    
 
     @Override
     public void onBinaryMessage(byte[] data) {}

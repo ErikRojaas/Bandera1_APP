@@ -34,6 +34,10 @@ public class Transform extends Component {
         this.position = this.position.add(translation);
     }
 
+    public void translate(float x, float y) {
+        this.position = this.position.add(new Vector2(x, y));
+    }
+
     public void translateX(float x) {
         this.position = this.position.add(new Vector2(x, 0));
     }

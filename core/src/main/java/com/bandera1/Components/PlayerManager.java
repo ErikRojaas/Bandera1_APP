@@ -89,7 +89,8 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             float dy = moveVector.getFloat("dy");
             //Update position
             PositionSync positionSync = player.getComponent(PositionSync.class);
-            positionSync.setTargetPosition(x,y);
+            positionSync.targetPosition.set(x, y);
+            positionSync.velocity.set(dx, dy);
             if (dx == 0 && dy == 0) {
                 positionSync.snap = true;
             } else {

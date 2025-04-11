@@ -6,31 +6,26 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-public class FlagAnimator {
+    public class FlagAnimator {
 
-    private static final int FRAME_WIDTH = 160;  // Ajusta si el tamaño del frame es diferente
-    private static final int FRAME_HEIGHT = 160;
-    private static final float FRAME_DURATION = 0.1f;
+        private static final int FRAME_WIDTH = 60;  // Ajusta si el tamaño del frame es diferente
+        private static final int FRAME_HEIGHT = 60;
+        private static final float FRAME_DURATION = 0.1f;
 
-    private Animation<TextureRegion> animation;
+        private Animation<TextureRegion> animation;
 
-    public FlagAnimator() {
-        Texture texture = new Texture(Gdx.files.internal("flag.png")); // Asegúrate del nombre correcto
-        texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        public FlagAnimator() {
+            Texture keyTexture = new Texture(Gdx.files.internal("flag_anim.png")); // Usa el nombre correcto
+            keyTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        TextureRegion[][] frames2D = TextureRegion.split(texture, FRAME_WIDTH, FRAME_HEIGHT);
-        Array<TextureRegion> frames = new Array<>();
+            TextureRegion[][] tmp = TextureRegion.split(keyTexture, FRAME_WIDTH, FRAME_HEIGHT);
+            TextureRegion[] frames = tmp[0]; // Primera fila
 
-        for (TextureRegion[] row : frames2D) {
-            for (TextureRegion frame : row) {
-                frames.add(frame);
-            }
+            Array<TextureRegion> animationFrames = new Array<>(frames);
+            animation = new Animation<>(FRAME_DURATION, animationFrames, Animation.PlayMode.LOOP);
         }
 
-        animation = new Animation<>(FRAME_DURATION, frames, Animation.PlayMode.LOOP);
+        public Animation<TextureRegion> getAnimation() {
+            return animation;
+        }
     }
-
-    public Animation<TextureRegion> getAnimation() {
-        return animation;
-    }
-}

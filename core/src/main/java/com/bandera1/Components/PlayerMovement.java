@@ -24,6 +24,12 @@ public class PlayerMovement extends Component {
 
     @Override
     public void update() {
+
+        if (animationRenderer == null) {
+            animationRenderer = gameObject.getComponent(AnimationRenderer.class);
+            if (animationRenderer == null) return; 
+        }
+
         if (InputSystem.onTouch(0)) {
             float x = InputSystem.getTouchX();
             float y = InputSystem.getTouchY();

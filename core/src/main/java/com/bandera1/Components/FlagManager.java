@@ -43,7 +43,7 @@ public class FlagManager extends Component implements WebSocketEventListener {
     @Override
     public void onMessage(ServerMessage message) {
         if (!active) return;
-
+        Gdx.app.log("Bandera",message.toString());
         if (message.type.equals("update") && message.data.has("flags")) {
             updateFlags(message.data.get("flags"));
         }
@@ -62,7 +62,7 @@ public class FlagManager extends Component implements WebSocketEventListener {
             } else {
                 GameObject flag = new GameObject("flag " + flagId);
 
-                AnimationRenderer renderer = new AnimationRenderer(animator.getAnimation().getKeyFrame(0));
+                AnimationRenderer renderer = new AnimationRenderer();
                 renderer.addAnimation("idle", animator.getAnimation());
                 renderer.play("idle");
 

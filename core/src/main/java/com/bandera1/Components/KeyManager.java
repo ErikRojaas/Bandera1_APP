@@ -51,36 +51,46 @@ public class KeyManager extends Component implements WebSocketEventListener {
         if (message.type.equals("update")) {
             if (message.data.has("keys")) {
                 JsonValue keys = message.data.get("keys");
+                Gdx.app.log("KeyManager", "Recibido JSON de llaves: " + keys.toString());
                 updateKeys(keys);
+            } else {
+                Gdx.app.log("KeyManager", "No se encontraron llaves en el mensaje.");
             }
         }
     }
+
 
     private void updateKeys(JsonValue data) {
         Set<String> currentKeys = new HashSet<>();
         for (JsonValue keyData : data) {
             String keyId = keyData.getString("id");
             currentKeys.add(keyId);
+            float x = keyData.getFloat("x");
+            float y = keyData.getFloat("y");
+
             if (keys.containsKey(keyId)) {
                 GameObject key = keys.get(keyId);
-                key.transform.position = new Vector2(keyData.getFloat("x"), keyData.getFloat("y"));
+                key.transform.position = new Vector2(x, y);
             } else {
-                GameObject key = new GameObject("key " + keyId);
-                AnimationRenderer renderer = new AnimationRenderer();
+                Gdx.app.log("KeyManager", "Creando nueva llave con ID: " + keyId + " en (" + x + ", " + y + ")");
+                GameObject key = new GameObject("key_" + keyId);
+                KeyAnimator animator = new KeyAnimator();
+                AnimationRenderer renderer = new AnimationRenderer(animator.getAnimation().getKeyFrame(0));
                 renderer.addAnimation("idle", animator.getAnimation());
                 renderer.play("idle");
 
                 key.addComponent(renderer);
                 key.addComponent(new Key());
-                key.transform.position = new Vector2(keyData.getFloat("x"), keyData.getFloat("y"));
-                key.transform.scale.set(2f,2f);
+                key.transform.position = new Vector2(x, y);
+                key.transform.scale.set(2f, 2f);
                 SceneSystem.activeScene.addGameObject(key);
-                Gdx.app.log("KeyManager", "Creating new key");
                 keys.put(keyId, key);
             }
         }
+
         keys.entrySet().removeIf(entry -> {
             if (!currentKeys.contains(entry.getKey())) {
+                Gdx.app.log("KeyManager", "Eliminando llave con ID: " + entry.getKey());
                 GameObject.Destroy(entry.getValue());
                 return true;
             }

@@ -24,20 +24,16 @@ public class PlayerAnimator {
     private final Map<Action, TextureRegion[][]> animationsRaw = new HashMap<>();
     private final Map<Action, Map<Direction, Animation<TextureRegion>>> animations = new HashMap<>();
 
-    // Constructor por defecto (usa Character1)
-    public PlayerAnimator() {
-        this("Characters/Character1/");
-    }
 
     // Constructor que permite cargar cualquier carpeta
-    public PlayerAnimator(String basePath) {
-        loadSpriteSheet(Action.IDLE, basePath + "Char_Idle.png");
-        loadSpriteSheet(Action.WALK, basePath + "Char_Walk.png");
-        loadSpriteSheet(Action.CARRY_IDLE, basePath + "Char_Carry_Idle.png");
-        loadSpriteSheet(Action.CARRY_WALK, basePath + "Char_Carry_Walk.png");
-        loadSpriteSheet(Action.ATTACK, basePath + "Char_Attack.png");
-        loadSpriteSheet(Action.DEATH, basePath + "Char_Death.png");
-
+    public PlayerAnimator(String basePath, String walkFile, String idleFile, String attackFile, String deathFile) {
+        loadSpriteSheet(Action.IDLE, basePath + idleFile);
+        loadSpriteSheet(Action.WALK, basePath + walkFile);
+        loadSpriteSheet(Action.CARRY_IDLE, basePath + "Char_Carry_Idle.png"); // Opcional: puedes pasarlo también por parámetro
+        loadSpriteSheet(Action.CARRY_WALK, basePath + "Char_Carry_Walk.png"); // Opcional
+        loadSpriteSheet(Action.ATTACK, basePath + attackFile);
+        loadSpriteSheet(Action.DEATH, basePath + deathFile);
+    
         generateAnimations();
     }
 

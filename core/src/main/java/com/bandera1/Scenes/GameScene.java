@@ -18,6 +18,7 @@ public class GameScene extends Scene {
         GameObject gameManager = new GameObject("gameManager");
         gameManager.addComponent(new PlayerManager());
         gameManager.addComponent(new KeyManager());
+        gameManager.addComponent(new FlagManager());
         addGameObject(gameManager);
 
         // Fondo
@@ -28,25 +29,9 @@ public class GameScene extends Scene {
 
         // Jugador local
         GameObject player = new GameObject("player");
-
-        int skinId = 1;
-
-        Player playerComponent = new Player("local", skinId);
-
-        // Animaciones personalizadas por skin
-        PlayerAnimator animator = new PlayerAnimator("Characters/Character" + skinId + "/");
-        AnimationRenderer animationRenderer = new AnimationRenderer();
-        for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
-            for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
-                animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
-            }
-        }
-        animationRenderer.play("IDLE_DOWN");
-
-        player.addComponent(animationRenderer);
+        player.addComponent(new Player());
         player.addComponent(new PlayerMovement());
         player.addComponent(new PositionSync());
-        player.addComponent(playerComponent);
         player.addComponent(new FollowCamera());
         player.transform.scale.set(4f, 4f);
 

@@ -6,6 +6,7 @@ public class Player extends Component {
     public String id;
     public String name;
     public int skinId = 1; 
+    public boolean hasKey = false;
 
     public Player() {}
 

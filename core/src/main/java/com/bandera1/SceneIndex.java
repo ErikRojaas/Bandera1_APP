@@ -7,5 +7,6 @@ public class SceneIndex {
     public static void addAllScenes() {
         SceneSystem.addScene("Menu",new MenuScene());
         SceneSystem.addScene("Game",new GameScene());
+        SceneSystem.addScene("Room",new RoomScene());
     }
 }

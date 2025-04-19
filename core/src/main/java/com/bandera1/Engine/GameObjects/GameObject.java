@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Intersector;
 
 import com.bandera1.Engine.Systems.SceneSystem;
 
@@ -26,14 +27,6 @@ public class GameObject implements Serializable {
 
     public GameObject(String name) {
         this.name = name;
-        id = UUID.randomUUID();
-        enabled = true;
-        components = new ArrayList<>();
-        transform = new Transform();
-        components.add(transform);
-    }
-
-    public GameObject(Texture texture) {
         id = UUID.randomUUID();
         enabled = true;
         components = new ArrayList<>();

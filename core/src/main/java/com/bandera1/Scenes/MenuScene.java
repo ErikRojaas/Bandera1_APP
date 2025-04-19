@@ -3,6 +3,7 @@ package com.bandera1.Scenes;
 import com.badlogic.gdx.graphics.Texture;
 import com.bandera1.Engine.GameObjects.AnimationRenderer;
 import com.bandera1.Engine.GameObjects.GameObject;
+import com.bandera1.Engine.GameObjects.RectangleCollider;
 import com.bandera1.Engine.GameObjects.Scene;
 import com.bandera1.Engine.GameObjects.TextRenderer;
 import com.bandera1.Engine.GameObjects.TextureRenderer;
@@ -35,21 +36,14 @@ public class MenuScene extends Scene {
         background.transform.position.set(0, 0);
         background.transform.scale.set(1.4f, 1.4f);
         addGameObject(background);
-
-        // Texto con de numero de jugadores
-        GameObject playerCountText = new GameObject("playerCountText");
-        playerCountText.addComponent(new TextRenderer("Players: 0"));
-        playerCountText.addComponent(new PlayerCountText());
-        playerCountText.transform.position.set(0, 200);
-        playerCountText.transform.scale.set(2, 2);
-        addGameObject(playerCountText);
-
         // Botón de inicio de juego
         GameObject startGameButton = new GameObject("startGameButton");
-        startGameButton.addComponent(new TextureRenderer(new Texture("button.jpg")));
+        startGameButton.addComponent(new TextureRenderer(new Texture("button2.jpeg")));
         startGameButton.addComponent(new TextRenderer("Start Game"));
-        startGameButton.addComponent(new StartButton());
-        startGameButton.transform.scale.set(3, 3);
+        startGameButton.addComponent(new SceneChangingButton("Menu"));
+        startGameButton.addComponent(new RectangleCollider(329, 153));
+
+        startGameButton.transform.scale.set(1,1);
         addGameObject(startGameButton);
     }
 }

@@ -1,6 +1,7 @@
 package com.bandera1.Engine.GameObjects;
 
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
 import com.bandera1.Engine.Systems.SceneSystem;
@@ -30,8 +31,7 @@ public class RectangleCollider extends Collider {
 
     @Override
     public void update() {
-        Vector3 position = SceneSystem.camera.project(new Vector3(transform.position.x, transform.position.y, 0));
-        collider.set(position.x + width/2, position.y + height/2, width, height);
+        collider.set(transform.position.x - width/2, transform.position.y - height/2, width, height);
     }
 
     @Override
@@ -47,6 +47,9 @@ public class RectangleCollider extends Collider {
 
     @Override
     public boolean isInside(Vector2 point) {
+        Gdx.app.log("RectangleCollider","collider: " + collider.x + ", " + collider.y + ", " + collider.width + ", " + collider.height);
+        Gdx.app.log("RectangleCollider","point: " + point);
+        Gdx.app.log("RectangleCollider","result: " + collider.contains(point.x, point.y));
         return collider.contains(point.x, point.y);
     }
 }

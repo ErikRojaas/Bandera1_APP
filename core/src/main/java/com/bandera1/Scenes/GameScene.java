@@ -4,6 +4,7 @@ import com.bandera1.Engine.GameObjects.AnimationRenderer;
 import com.bandera1.Engine.GameObjects.GameObject;
 import com.bandera1.Engine.GameObjects.Scene;
 import com.bandera1.Engine.GameObjects.TextureRenderer;
+import com.bandera1.Engine.GameObjects.TextRenderer;
 import com.bandera1.Components.*;
 
 import com.badlogic.gdx.graphics.Texture;
@@ -34,7 +35,23 @@ public class GameScene extends Scene {
         player.addComponent(new PositionSync());
         player.addComponent(new FollowCamera());
         player.transform.scale.set(4f, 4f);
-
         addGameObject(player);
+
+        // Timer
+        GameObject gameTimer = new GameObject("gameTimer");
+        gameTimer.addComponent(new GameTimerManager());
+        TextRenderer timerText = new TextRenderer("2:00");
+        timerText.setScreenPosition(1150, 1000);
+        gameTimer.addComponent(timerText);
+        gameTimer.transform.scale.set(5, 5);
+        addGameObject(gameTimer);
+        
+        // Puntos del jugador
+        GameObject playerPointsText = new GameObject("playerPointsText");
+        TextRenderer playerPointsTextRenderer = new TextRenderer("Points: 0");
+        playerPointsTextRenderer.setScreenPosition(1150, 900);
+        playerPointsText.addComponent(playerPointsTextRenderer);
+        playerPointsText.transform.scale.set(5, 5);
+        addGameObject(playerPointsText);
     }
 }

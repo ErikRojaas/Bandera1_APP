@@ -76,6 +76,7 @@ public class SceneSystem {
 
     public static void changeScene(String name) {
         if (scenes.containsKey(name)) {
+            MoveCameraTo(0, 0);
             activeScene = scenes.get(name);
             newGameObjects.clear();
             newGameObjects.addAll(activeScene.gameObjects);

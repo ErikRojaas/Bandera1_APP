@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.bandera1.Engine.GameObjects.TextureRenderer;
+import com.bandera1.Engine.GameObjects.TextRenderer;
 import com.bandera1.Utils.ServerMessage;
 import com.bandera1.Utils.ServerUtils;
 import com.bandera1.Utils.WebSocketEventListener;
@@ -26,6 +27,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     private GameObject player;
     private Map<String, GameObject> otherPlayers;
     private boolean active;
+    private TextRenderer textRenderer;
 
     @Override
     public void init() {
@@ -37,6 +39,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     public void start() {
         active = true;
         player = GameObject.Find("player");
+        textRenderer = GameObject.Find("playerPointsText").getComponent(TextRenderer.class);
     }
 
     @Override
@@ -100,6 +103,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
     private void updatePlayer(GameObject player, JsonValue playerData, boolean isLocal) {
         if (player != null && playerData != null) {
+            Gdx.app.log("PlayerManager", "PlayerData: " + playerData);
             float x = playerData.getFloat("x");
             float y = playerData.getFloat("y");
             JsonValue moveVector = playerData.get("moveVector");
@@ -114,11 +118,26 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     
             // NUEVO: actualizar hasKey y cambiar sprites si es necesario
             Player playerComponent = player.getComponent(Player.class);
-            if (playerComponent != null && playerData.has("hasKey")) {
-                boolean newHasKey = playerData.getBoolean("hasKey");
-                if (playerComponent.hasKey != newHasKey) {
-                    playerComponent.hasKey = newHasKey;
-                    changePlayerSprites(player, playerComponent);
+            if (playerComponent != null) {
+                if (playerData.has("hasKey")) {
+                    boolean newHasKey = playerData.getBoolean("hasKey");
+                    if (playerComponent.hasKey != newHasKey) {
+                        playerComponent.hasKey = newHasKey;
+                        changePlayerSprites(player, playerComponent);
+                    }
+                }
+                
+                // Actualizar puntos del jugador
+                if (playerData.has("points")) {
+                    int newPoints = playerData.getInt("points");
+                    playerComponent.points = newPoints;
+                    
+                    // Actualizar texto de puntos si es el jugador local
+                    if (isLocal) {
+                        if (textRenderer != null) {
+                            textRenderer.setText("Points: " + newPoints);
+                        }
+                    }
                 }
             }
     
@@ -179,6 +198,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             String playerId = playerData.getString("id");
             int skinId = playerData.has("skinId") ? playerData.getInt("skinId") : 1;
             boolean hasKey = playerData.has("hasKey") && playerData.getBoolean("hasKey");
+            int points = playerData.has("points") ? playerData.getInt("points") : 0;
             currentPlayerIds.add(playerId);
             GameObject otherPlayer = otherPlayers.get(playerId);
     
@@ -201,6 +221,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                 Player playerComponent = new Player(playerId);
                 playerComponent.hasKey = hasKey;
                 playerComponent.skinId = skinId;
+                playerComponent.points = points;
     
                 newPlayer.addComponent(playerComponent);
                 newPlayer.addComponent(animationRenderer);
@@ -224,9 +245,15 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     
             } else {
                 Player playerComponent = otherPlayer.getComponent(Player.class);
-                if (playerComponent != null && playerComponent.hasKey != hasKey) {
-                    playerComponent.hasKey = hasKey;
-                    changePlayerSprites(otherPlayer, playerComponent);
+                if (playerComponent != null) {
+                    if (playerComponent.hasKey != hasKey) {
+                        playerComponent.hasKey = hasKey;
+                        changePlayerSprites(otherPlayer, playerComponent);
+                    }
+                    
+                    if (playerComponent.points != points) {
+                        playerComponent.points = points;
+                    }
                 }
                 updatePlayer(otherPlayer, playerData, false);
             }

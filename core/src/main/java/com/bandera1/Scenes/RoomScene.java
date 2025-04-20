@@ -37,7 +37,7 @@ public class RoomScene extends Scene {
         GameObject roomTimer = new GameObject("Timer");
         roomTimer.addComponent(new TimerManager());
         roomTimer.addComponent(new TextRenderer("2:00"));
-        roomTimer.transform.position.set(0, 75);
+        roomTimer.transform.position.set(0, 77);
         roomTimer.transform.scale.set(2, 2);
         addGameObject(roomTimer);
         // Back bottom Text

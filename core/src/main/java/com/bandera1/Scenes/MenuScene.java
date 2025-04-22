@@ -38,11 +38,11 @@ public class MenuScene extends Scene {
         addGameObject(background);
         // Botón de inicio de juego
         GameObject startGameButton = new GameObject("startGameButton");
-        startGameButton.addComponent(new TextureRenderer(new Texture("button2.jpeg")));
+        startGameButton.addComponent(new TextureRenderer(new Texture("button3.png")));
         startGameButton.addComponent(new SceneChangingButton("Room"));
         startGameButton.addComponent(new RectangleCollider(329, 153));
 
-        startGameButton.transform.scale.set(1,1);
+        startGameButton.transform.scale.set(0.4f, 0.4f);
         addGameObject(startGameButton);
     }
 }

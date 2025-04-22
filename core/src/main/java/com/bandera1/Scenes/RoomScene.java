@@ -8,6 +8,7 @@ import com.bandera1.Engine.GameObjects.TextureRenderer;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 
+import com.bandera1.Components.LastWinnerManager;
 import com.bandera1.Components.PlayerCountText;
 import com.bandera1.Components.SceneChangingButton;
 import com.bandera1.Components.TimerManager;
@@ -26,9 +27,10 @@ public class RoomScene extends Scene {
         playerCountText.transform.scale.set(2, 2);
         addGameObject(playerCountText);
 
-        // Won Text TODO
+        // Won Text
         GameObject lastWonText = new GameObject("lastWonText");
         lastWonText.addComponent(new TextRenderer("No game has been played yet"));
+        lastWonText.addComponent(new LastWinnerManager());
         lastWonText.transform.position.set(0, -30);
         lastWonText.transform.scale.set(4, 4);
         addGameObject(lastWonText);

@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
+// Import BitmapFont if not already imported (assuming TextRenderer might need it or defaults)
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+
 public class PlayerManager extends Component implements WebSocketEventListener {
     private GameObject player;
     private Map<String, GameObject> otherPlayers;
@@ -56,16 +59,16 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     @Override
     public void onMessage(ServerMessage message) {
         if (!active) return;
-    
+
         if (message.type.equals("update")) {
             JsonValue data = message.data;
-    
+
             if (data.has("clientPlayer")) {
                 JsonValue clientPlayerData = data.get("clientPlayer");
-    
+
                 if (player.getComponent(AnimationRenderer.class) == null) {
                     int skinId = clientPlayerData.has("skinId") ? clientPlayerData.getInt("skinId") : 1;
-    
+
                     PlayerAnimator animator = new PlayerAnimator(
                         "Characters/Character" + skinId + "/",
                         "Char_Walk.png",
@@ -73,33 +76,33 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                         "Char_Attack.png",
                         "Char_Death.png"
                     );
-    
+
                     Gdx.app.log("PlayerManager", "Local player skinId = " + skinId);
-    
+
                     Animation<TextureRegion> idleDownAnim = animator.getAnimation(PlayerAnimator.Action.IDLE, PlayerAnimator.Direction.DOWN);
                     TextureRegion initialFrame = idleDownAnim.getKeyFrame(0);
                     AnimationRenderer animationRenderer = new AnimationRenderer(initialFrame);
-    
+
                     for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
                         for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
                             animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
                         }
                     }
-    
+
                     animationRenderer.play("IDLE_DOWN");
                     player.addComponent(animationRenderer);
                 }
-    
+
                 updatePlayer(player, clientPlayerData, true);
             }
-    
+
             if (data.has("otherPlayers")) {
                 JsonValue otherPlayersArray = data.get("otherPlayers");
                 updateOtherPlayers(otherPlayersArray);
             }
         }
     }
-    
+
 
     private void updatePlayer(GameObject player, JsonValue playerData, boolean isLocal) {
         if (player != null && playerData != null) {
@@ -109,13 +112,14 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             JsonValue moveVector = playerData.get("moveVector");
             float dx = moveVector.getFloat("dx");
             float dy = moveVector.getFloat("dy");
-    
+            String nickname = playerData.getString("nickname", isLocal ? "You" : "Player");
+
             // Actualizar posición
             PositionSync positionSync = player.getComponent(PositionSync.class);
             positionSync.targetPosition.set(x, y);
             positionSync.velocity.set(dx, dy);
             positionSync.snap = (dx == 0 && dy == 0);
-    
+
             // NUEVO: actualizar hasKey y cambiar sprites si es necesario
             Player playerComponent = player.getComponent(Player.class);
             if (playerComponent != null) {
@@ -126,12 +130,12 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                         changePlayerSprites(player, playerComponent);
                     }
                 }
-                
+
                 // Actualizar puntos del jugador
                 if (playerData.has("points")) {
                     int newPoints = playerData.getInt("points");
                     playerComponent.points = newPoints;
-                    
+
                     // Actualizar texto de puntos si es el jugador local
                     if (isLocal) {
                         if (textRenderer != null) {
@@ -140,10 +144,21 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                     }
                 }
             }
-    
+
+            // Update or add Nickname TextRenderer
+            TextRenderer nicknameRenderer = player.getComponent(TextRenderer.class);
+            if (nicknameRenderer == null) {
+                nicknameRenderer = new TextRenderer(nickname);
+                nicknameRenderer.offsetY = 40f;
+                nicknameRenderer.fontScale = 0.3f;
+                player.addComponent(nicknameRenderer);
+            } else {
+                nicknameRenderer.setText(nickname);
+            }
+
             // Evitar animaciones automáticas si es el jugador local
             if (isLocal) return;
-    
+
             AnimationRenderer animationRenderer = player.getComponent(AnimationRenderer.class);
             if (dx == 0 && dy == 0) {
                 String playedAnimation = animationRenderer.currentAnimationName;
@@ -155,94 +170,101 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             } else {
                 animationRenderer.play(dy > 0 ? "WALK_DOWN" : "WALK_UP");
             }
-    
+
         } else {
             Gdx.app.log("PlayerManager", "Player or playerData is null");
         }
     }
+
     private void changePlayerSprites(GameObject player, Player playerComponent) {
         int skinId = playerComponent.skinId;
         boolean hasKey = playerComponent.hasKey;
-    
+
         // Determinar carpeta de la skin
         String path = "Characters/Character" + skinId + "/";
-    
+
         // Elegir sprites según si tiene llave
         String walk = hasKey ? "Char_Carry_Key_Walk.png" : "Char_Walk.png";
         String idle = hasKey ? "Char_Carry_Key_Idle.png" : "Char_Idle.png";
         String attack = "Char_Attack.png";
         String death = "Char_Death.png";
-    
+
         // Crear nuevo animador con los sprites correctos
         PlayerAnimator animator = new PlayerAnimator(path, walk, idle, attack, death);
-    
+
         AnimationRenderer animationRenderer = player.getComponent(AnimationRenderer.class);
         if (animationRenderer == null) return;
-    
+
         animationRenderer.animations.clear(); // Limpiar animaciones anteriores
-    
+
         for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
             for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
                 animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
             }
         }
-    
+
         animationRenderer.play("IDLE_DOWN");
     }
-        
-    
+
+
     private void updateOtherPlayers(JsonValue otherPlayersArray) {
         Set<String> currentPlayerIds = new HashSet<>();
-    
+
         for (JsonValue playerData : otherPlayersArray) {
             String playerId = playerData.getString("id");
             int skinId = playerData.has("skinId") ? playerData.getInt("skinId") : 1;
             boolean hasKey = playerData.has("hasKey") && playerData.getBoolean("hasKey");
             int points = playerData.has("points") ? playerData.getInt("points") : 0;
+            String nickname = playerData.getString("nickname", "Player");
             currentPlayerIds.add(playerId);
             GameObject otherPlayer = otherPlayers.get(playerId);
-    
+
             if (otherPlayer == null) {
                 float x = playerData.getFloat("x");
                 float y = playerData.getFloat("y");
-    
+
                 PlayerAnimator animator = createAnimatorForSkin(skinId, hasKey);
                 Animation<TextureRegion> initialAnimation = animator.getAnimation(PlayerAnimator.Action.IDLE, PlayerAnimator.Direction.DOWN);
                 TextureRegion initialFrame = initialAnimation.getKeyFrame(0);
                 AnimationRenderer animationRenderer = new AnimationRenderer(initialFrame);
-    
+
                 for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
                     for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
                         animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
                     }
                 }
-    
+
                 GameObject newPlayer = new GameObject("player " + playerId);
                 Player playerComponent = new Player(playerId);
                 playerComponent.hasKey = hasKey;
                 playerComponent.skinId = skinId;
                 playerComponent.points = points;
-    
+
                 newPlayer.addComponent(playerComponent);
                 newPlayer.addComponent(animationRenderer);
                 newPlayer.addComponent(new PositionSync());
                 newPlayer.transform.position.set(x, y);
                 newPlayer.transform.scale.set(4f, 4f);
-    
+
+                TextRenderer nickRenderer = new TextRenderer(nickname);
+                nickRenderer.offsetY = 40f;
+                nickRenderer.fontScale = 0.3f;
+                newPlayer.addComponent(nickRenderer);
+
                 JsonValue moveVector = playerData.get("moveVector");
                 float dx = moveVector.getFloat("dx");
                 float dy = moveVector.getFloat("dy");
-    
+
                 if (Math.abs(dx) > Math.abs(dy)) {
                     animationRenderer.play(dx > 0 ? "IDLE_RIGHT" : "IDLE_LEFT");
                 } else {
                     animationRenderer.play(dy > 0 ? "IDLE_DOWN" : "IDLE_UP");
                 }
-    
+
                 SceneSystem.activeScene.addGameObject(newPlayer);
                 otherPlayers.put(playerId, newPlayer);
                 Gdx.app.log("PlayerManager", "Created new player: " + playerId);
-    
+
             } else {
                 Player playerComponent = otherPlayer.getComponent(Player.class);
                 if (playerComponent != null) {
@@ -250,15 +272,26 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                         playerComponent.hasKey = hasKey;
                         changePlayerSprites(otherPlayer, playerComponent);
                     }
-                    
+
                     if (playerComponent.points != points) {
                         playerComponent.points = points;
                     }
                 }
+                // Update nickname text
+                TextRenderer nickRenderer = otherPlayer.getComponent(TextRenderer.class);
+                if (nickRenderer != null) {
+                    nickRenderer.setText(nickname);
+                } else {
+                    // Add if missing (should not happen often if added on creation)
+                    nickRenderer = new TextRenderer(nickname);
+                    nickRenderer.offsetY = 40f;
+                    nickRenderer.fontScale = 0.3f;
+                    otherPlayer.addComponent(nickRenderer);
+                }
                 updatePlayer(otherPlayer, playerData, false);
             }
         }
-    
+
         otherPlayers.entrySet().removeIf(entry -> {
             if (!currentPlayerIds.contains(entry.getKey())) {
                 GameObject.Destroy(entry.getValue());
@@ -267,7 +300,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             return false;
         });
     }
-    
+
     private PlayerAnimator createAnimatorForSkin(int skinId, boolean hasKey) {
         String path = "Characters/Character" + skinId + "/";
         String walk = hasKey ? "Char_Carry_Key_Walk.png" : "Char_Walk.png";
@@ -276,7 +309,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         String death = "Char_Death.png";
         return new PlayerAnimator(path, walk, idle, attack, death);
     }
-    
+
     @Override
     public void onBinaryMessage(byte[] data) {}
 

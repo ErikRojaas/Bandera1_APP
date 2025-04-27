@@ -1,6 +1,7 @@
 package com.bandera1.Components;
 
 import com.bandera1.Engine.GameObjects.AnimationRenderer;
+import com.bandera1.Engine.GameObjects.CircleCollider;
 import com.bandera1.Engine.GameObjects.Component;
 import com.bandera1.Engine.GameObjects.GameObject;
 import com.bandera1.Utils.ServerMessage;
@@ -74,13 +75,14 @@ public class KeyManager extends Component implements WebSocketEventListener {
             } else {
                 Gdx.app.log("KeyManager", "Creando nueva llave con ID: " + keyId + " en (" + x + ", " + y + ")");
                 GameObject key = new GameObject("key_" + keyId);
-                KeyAnimator animator = new KeyAnimator();
+
                 AnimationRenderer renderer = new AnimationRenderer(animator.getAnimation().getKeyFrame(0));
                 renderer.addAnimation("idle", animator.getAnimation());
                 renderer.play("idle");
 
                 key.addComponent(renderer);
-                key.addComponent(new Key());
+                key.addComponent(new Key()); 
+                key.addComponent(new CircleCollider(16)); // ¡AÑADIMOS EL COLLIDER AQUÍ!
                 key.transform.position = new Vector2(x, y);
                 key.transform.scale.set(2f, 2f);
                 SceneSystem.activeScene.addGameObject(key);

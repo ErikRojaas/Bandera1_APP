@@ -123,9 +123,16 @@ public class SceneSystem {
         viewport.update(width, height);
         List<GameObject> newObjects = new ArrayList<>(newGameObjects);
         newGameObjects.clear();
-        for (GameObject gameObject : newObjects)
-        for (Component component : gameObject.components)
-            component.start();
+        
+        for (GameObject gameObject : newObjects) {
+            if (activeScene != null) {
+                activeScene.addGameObject(gameObject); 
+            }
+            for (Component component : gameObject.components) {
+                component.start(); 
+            }
+        }
+        
         if (activeScene != null) {
             activeScene.update();
         }

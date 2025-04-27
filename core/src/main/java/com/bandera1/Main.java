@@ -8,6 +8,7 @@ import com.bandera1.Engine.Systems.InputSystem;
 import com.bandera1.Engine.Systems.SceneSystem;
 import com.badlogic.gdx.Gdx;
 import com.bandera1.Utils.ServerUtils;
+import com.bandera1.Utils.KeyboardHelper;
 
 public class Main extends ApplicationAdapter {
 
@@ -17,12 +18,13 @@ public class Main extends ApplicationAdapter {
     public CollisionSystem collisionSystem;
     public ServerUtils serverUtils;
     private static final String SERVER_HOST = "wss://bandera1.ieti.site:443?type=mobile";
+    public KeyboardHelper keyboardHelper;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
         serverUtils = new ServerUtils(SERVER_HOST);
-        sceneSystem = new SceneSystem(1024, 480);
+        sceneSystem = new SceneSystem(1024, 480, keyboardHelper);
         inputSystem = new InputSystem();
         Gdx.input.setInputProcessor(inputSystem);
         collisionSystem = new CollisionSystem();

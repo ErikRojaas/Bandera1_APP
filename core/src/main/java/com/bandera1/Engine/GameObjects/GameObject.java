@@ -68,6 +68,14 @@ public class GameObject implements Serializable {
         component.gameObject = null;
     }
 
+    public final void show() {
+        enabled = true;
+    }
+
+    public final void hide() {
+        enabled = false;
+    }
+
     private GameObject deepClone() {
         try {
             // Serialize the object to a byte array

@@ -48,8 +48,8 @@ public class ImageRenderer extends Component {
         } else {
             batch.draw(
                 texture,
-                gameObject.transform.position.x - width / 5f,
-                gameObject.transform.position.y - height / 5f,
+                screenX - width / 1.5f,
+                screenY - height / 1.5f,
                 width,
                 height
             );
@@ -62,10 +62,10 @@ public class ImageRenderer extends Component {
     }
 
     public boolean isTouched(float touchX, float touchY) {
-        float minX = screenX - width / 5f;
-        float maxX = screenX + width / 5f;
-        float minY = screenY - height / 5f;
-        float maxY = screenY + height / 5f;
+        float minX = screenX - width / 1.5f;
+        float maxX = screenX + width / 1.5f;
+        float minY = screenY - height / 1.5f;
+        float maxY = screenY + height / 1.5f;
 
         return useScreenSpace &&
                touchX >= minX && touchX <= maxX &&

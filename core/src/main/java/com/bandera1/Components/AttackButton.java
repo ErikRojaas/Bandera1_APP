@@ -14,18 +14,29 @@ public class AttackButton extends Component {
     @Override
     public void init() {
         Texture buttonTexture = new Texture(Gdx.files.internal("attack_button.png"));
-        imageRenderer = new ImageRenderer(buttonTexture, 288, 288); // Tamaño más pequeño
+
+        // Redimensionar el botón a algo más pequeño y cómodo
+        float width = 300f;
+        float height = 300f;
+
+        imageRenderer = new ImageRenderer(buttonTexture, width, height);
         gameObject.addComponent(imageRenderer);
 
-        imageRenderer.setScreenPosition(1900, 80); // Abajo a la derecha para pantalla 800x480
+        // Posición visible: esquina inferior derecha
+        float posX = SceneSystem.width - 400f; // 800 - 60
+        float posY = 60f;
+        imageRenderer.setScreenPosition(posX, posY);
     }
 
     @Override
     public void update() {
+        Gdx.app.log("AttackButton", "Update ejecutado");
+
         if (Gdx.input.justTouched()) {
             Vector2 touch = new Vector2(Gdx.input.getX(), SceneSystem.height - Gdx.input.getY());
 
             if (imageRenderer.isTouched(touch.x, touch.y)) {
+                Gdx.app.log("AttackButton", "Botón de ataque pulsado");
                 PlayerManager.requestAttack();
             }
         }

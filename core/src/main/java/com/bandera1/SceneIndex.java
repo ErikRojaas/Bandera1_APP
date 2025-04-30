@@ -8,5 +8,6 @@ public class SceneIndex {
         SceneSystem.addScene("Menu",new MenuScene());
         SceneSystem.addScene("Game",new GameScene());
         SceneSystem.addScene("Room",new RoomScene());
+        SceneSystem.addScene("Login",new LoginScene());
     }
 }

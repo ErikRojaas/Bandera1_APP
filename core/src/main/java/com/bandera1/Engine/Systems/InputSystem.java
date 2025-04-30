@@ -2,8 +2,6 @@ package com.bandera1.Engine.Systems;
 
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
-
-import com.bandera1.Engine.Systems.SceneSystem;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,6 +9,7 @@ public class InputSystem implements InputProcessor {
     private static Set<Integer> keysDown = new HashSet<>();
     private static Set<Integer> keysUp = new HashSet<>();
     private static Set<Integer> keys = new HashSet<>();
+    private static Set<Character> keysTyped = new HashSet<>();
 
     private static boolean isTouching = false;
     private static boolean justTouched = false;
@@ -34,6 +33,22 @@ public class InputSystem implements InputProcessor {
 
     public static boolean onKey(int keycode) {
         return keys.contains(keycode);
+    }
+
+    public static Set<Integer> getKeys() {
+        return keys;
+    }
+
+    public static Set<Integer> getKeysDown() {
+        return keysDown;
+    }
+
+    public static Set<Integer> getKeysUp() {
+        return keysUp;
+    }
+
+    public static Set<Character> getKeysTyped() {
+        return keysTyped;
     }
 
     // Touch input methods
@@ -61,6 +76,10 @@ public class InputSystem implements InputProcessor {
         return justReleased && touchButton == button;
     }
 
+    public static Vector2 getTouchPosition() {
+        return SceneSystem.ScreenToWorldPoint(new Vector2(touchX, touchY));
+    }
+
     public static float getTouchX() {
         return SceneSystem.ScreenToWorldPoint(new Vector2(touchX, touchY)).x;
     }
@@ -76,6 +95,10 @@ public class InputSystem implements InputProcessor {
     // Mouse movement methods
     public static boolean onMouseMoved() {
         return mouseMoved;
+    }
+
+    public static Vector2 getMousePosition() {
+        return SceneSystem.ScreenToWorldPoint(new Vector2(mouseX, mouseY));
     }
 
     public static float getMouseX() {
@@ -166,6 +189,7 @@ public class InputSystem implements InputProcessor {
     public static void update() {
         keysDown.clear();
         keysUp.clear();
+        keysTyped.clear();
         if (!isTouching)
             touchButton = -1;
         justTouched = false;
@@ -180,6 +204,7 @@ public class InputSystem implements InputProcessor {
 
     @Override
     public boolean keyTyped(char character) {
-       return true;
+        keysTyped.add(character);
+        return true;
     }
 }

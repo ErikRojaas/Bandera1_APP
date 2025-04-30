@@ -23,7 +23,6 @@ public class ServerUtils implements WebSocketListener {
         socket.addListener(this);
         instance = this;
     }
-
     public void addListener(WebSocketEventListener listener) {
         if (listener != null && !listeners.contains(listener)) {
             listeners.add(listener);

@@ -39,7 +39,7 @@ public class MenuScene extends Scene {
         // Botón de inicio de juego
         GameObject startGameButton = new GameObject("startGameButton");
         startGameButton.addComponent(new TextureRenderer(new Texture("button3.png")));
-        startGameButton.addComponent(new SceneChangingButton("Room"));
+        startGameButton.addComponent(new SceneChangingButton("Login"));
         startGameButton.addComponent(new RectangleCollider(329, 153));
 
         startGameButton.transform.scale.set(0.4f, 0.4f);

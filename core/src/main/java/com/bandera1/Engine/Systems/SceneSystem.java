@@ -2,6 +2,7 @@ package com.bandera1.Engine.Systems;
 
 import com.bandera1.SceneIndex;
 import com.bandera1.Engine.GameObjects.*;
+import com.bandera1.Utils.KeyboardHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,16 +28,30 @@ public class SceneSystem {
     public static int width = 800;
     public static int height = 480;
 
-    public SceneSystem(int w, int h) {
+    private static KeyboardHelper keyboardHelper;
+
+    public SceneSystem(int w, int h, KeyboardHelper keyboardHelper) {
         width = w;
         height = h;
         scenes = new HashMap<>();
         viewport = new FitViewport(width, height);
         camera = new OrthographicCamera(width, height);
         camera.position.set(0, 0, 0);
-
+        this.keyboardHelper = keyboardHelper;
         newGameObjects = new ArrayList<>();
         SceneIndex.addAllScenes();
+    }
+
+    public static void showKeyboard() {
+        if (keyboardHelper != null) {
+            keyboardHelper.showKeyboard();
+        }
+    }
+
+    public static void hideKeyboard() {
+        if (keyboardHelper != null) {
+            keyboardHelper.hideKeyboard();
+        }
     }
 
     public static Vector2 ScreenToWorldPoint(Vector2 screenPoint) {
@@ -108,9 +123,16 @@ public class SceneSystem {
         viewport.update(width, height);
         List<GameObject> newObjects = new ArrayList<>(newGameObjects);
         newGameObjects.clear();
-        for (GameObject gameObject : newObjects)
-        for (Component component : gameObject.components)
-            component.start();
+        
+        for (GameObject gameObject : newObjects) {
+            if (activeScene != null) {
+                activeScene.addGameObject(gameObject); 
+            }
+            for (Component component : gameObject.components) {
+                component.start(); 
+            }
+        }
+        
         if (activeScene != null) {
             activeScene.update();
         }

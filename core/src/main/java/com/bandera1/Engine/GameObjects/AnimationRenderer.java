@@ -35,6 +35,10 @@ public class AnimationRenderer extends Component {
         animations.put(name, animation);
     }
 
+    public void clearAnimations() {
+        animations.clear();
+    }
+    
     public void play(String name) {
         if (!name.equals(currentAnimationName)) { // Prevent unnecessary resets
             Animation<TextureRegion> animation = animations.get(name);

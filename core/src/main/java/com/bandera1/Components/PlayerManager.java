@@ -23,14 +23,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
-// Import BitmapFont if not already imported (assuming TextRenderer might need it or defaults)
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-
 public class PlayerManager extends Component implements WebSocketEventListener {
+
     private GameObject player;
     private Map<String, GameObject> otherPlayers;
     private boolean active;
     private TextRenderer textRenderer;
+    private PlayerAnimator.Direction lastDirection = PlayerAnimator.Direction.DOWN;
+    public static boolean attackRequested = false;
 
     @Override
     public void init() {
@@ -43,6 +43,10 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         active = true;
         player = GameObject.Find("player");
         textRenderer = GameObject.Find("playerPointsText").getComponent(TextRenderer.class);
+        GameObject attackButtonObj = new GameObject("attackButton");
+        attackButtonObj.addComponent(new AttackButton());
+        SceneSystem.activeScene.addGameObject(attackButtonObj);
+
     }
 
     @Override
@@ -65,34 +69,9 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
             if (data.has("clientPlayer")) {
                 JsonValue clientPlayerData = data.get("clientPlayer");
-
                 if (player.getComponent(AnimationRenderer.class) == null) {
-                    int skinId = clientPlayerData.has("skinId") ? clientPlayerData.getInt("skinId") : 1;
-
-                    PlayerAnimator animator = new PlayerAnimator(
-                        "Characters/Character" + skinId + "/",
-                        "Char_Walk.png",
-                        "Char_Idle.png",
-                        "Char_Attack.png",
-                        "Char_Death.png"
-                    );
-
-                    Gdx.app.log("PlayerManager", "Local player skinId = " + skinId);
-
-                    Animation<TextureRegion> idleDownAnim = animator.getAnimation(PlayerAnimator.Action.IDLE, PlayerAnimator.Direction.DOWN);
-                    TextureRegion initialFrame = idleDownAnim.getKeyFrame(0);
-                    AnimationRenderer animationRenderer = new AnimationRenderer(initialFrame);
-
-                    for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
-                        for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
-                            animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
-                        }
-                    }
-
-                    animationRenderer.play("IDLE_DOWN");
-                    player.addComponent(animationRenderer);
+                    createAnimationRenderer(player, clientPlayerData);
                 }
-
                 updatePlayer(player, clientPlayerData, true);
             }
 
@@ -103,191 +82,86 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         }
     }
 
-
     private void updatePlayer(GameObject player, JsonValue playerData, boolean isLocal) {
-        if (player != null && playerData != null) {
-            Gdx.app.log("PlayerManager", "PlayerData: " + playerData);
-            float x = playerData.getFloat("x");
-            float y = playerData.getFloat("y");
-            JsonValue moveVector = playerData.get("moveVector");
-            float dx = moveVector.getFloat("dx");
-            float dy = moveVector.getFloat("dy");
-            String nickname = playerData.getString("nickname", isLocal ? "You" : "Player");
+        if (player == null || playerData == null) return;
 
-            // Actualizar posición
-            PositionSync positionSync = player.getComponent(PositionSync.class);
+        float x = playerData.getFloat("x");
+        float y = playerData.getFloat("y");
+        JsonValue moveVector = playerData.get("moveVector");
+        float dx = moveVector.getFloat("dx");
+        float dy = moveVector.getFloat("dy");
+        String nickname = playerData.getString("nickname", isLocal ? "You" : "Player");
+        int teamId = playerData.getInt("teamId", 0);
+        int skinId = playerData.getInt("skinId", 1);
+        boolean hasKey = playerData.getBoolean("hasKey", false);
+        boolean hasFlag = playerData.getBoolean("hasFlag", false);
+
+        PositionSync positionSync = player.getComponent(PositionSync.class);
+        if (positionSync != null) {
             positionSync.targetPosition.set(x, y);
-            positionSync.velocity.set(dx, dy);
+
+            // Reducir velocidad si lleva llave o bandera
+            float finalDx = dx;
+            float finalDy = dy;
+            if (hasKey || hasFlag) {
+                finalDx *= 0.75f; 
+                finalDy *= 0.75f;
+            }
+            positionSync.velocity.set(finalDx, finalDy);
+
             positionSync.snap = (dx == 0 && dy == 0);
-
-            // NUEVO: actualizar hasKey y cambiar sprites si es necesario
-            Player playerComponent = player.getComponent(Player.class);
-            if (playerComponent != null) {
-                if (playerData.has("hasKey")) {
-                    boolean newHasKey = playerData.getBoolean("hasKey");
-                    if (playerComponent.hasKey != newHasKey) {
-                        playerComponent.hasKey = newHasKey;
-                        changePlayerSprites(player, playerComponent);
-                    }
-                }
-
-                // Actualizar puntos del jugador
-                if (playerData.has("points")) {
-                    int newPoints = playerData.getInt("points");
-                    playerComponent.points = newPoints;
-
-                    // Actualizar texto de puntos si es el jugador local
-                    if (isLocal) {
-                        if (textRenderer != null) {
-                            textRenderer.setText("Points: " + newPoints);
-                        }
-                    }
-                }
-            }
-
-            // Update or add Nickname TextRenderer
-            TextRenderer nicknameRenderer = player.getComponent(TextRenderer.class);
-            if (nicknameRenderer == null) {
-                nicknameRenderer = new TextRenderer(nickname);
-                nicknameRenderer.offsetY = 40f;
-                nicknameRenderer.fontScale = 0.3f;
-                player.addComponent(nicknameRenderer);
-            } else {
-                nicknameRenderer.setText(nickname);
-            }
-
-            // Evitar animaciones automáticas si es el jugador local
-            if (isLocal) return;
-
-            AnimationRenderer animationRenderer = player.getComponent(AnimationRenderer.class);
-            if (dx == 0 && dy == 0) {
-                String playedAnimation = animationRenderer.currentAnimationName;
-                if (playedAnimation != null && playedAnimation.contains("WALK")) {
-                    animationRenderer.play("IDLE_" + playedAnimation.substring(5));
-                }
-            } else if (Math.abs(dx) > Math.abs(dy)) {
-                animationRenderer.play(dx > 0 ? "WALK_RIGHT" : "WALK_LEFT");
-            } else {
-                animationRenderer.play(dy > 0 ? "WALK_DOWN" : "WALK_UP");
-            }
-
-        } else {
-            Gdx.app.log("PlayerManager", "Player or playerData is null");
         }
-    }
 
-    private void changePlayerSprites(GameObject player, Player playerComponent) {
-        int skinId = playerComponent.skinId;
-        boolean hasKey = playerComponent.hasKey;
+        Player playerComponent = player.getComponent(Player.class);
+        if (playerComponent != null) {
+            if (playerComponent.teamId != teamId) {
+                playerComponent.teamId = teamId;
+                ensureTextRenderers(player, nickname, teamId);
+            }
 
-        // Determinar carpeta de la skin
-        String path = "Characters/Character" + skinId + "/";
+            if (playerComponent.skinId != skinId || 
+                playerComponent.hasKey != hasKey || 
+                playerComponent.hasFlag != hasFlag) {
+                playerComponent.skinId = skinId;
+                playerComponent.hasKey = hasKey;
+                playerComponent.hasFlag = hasFlag;
+                updateAnimationRenderer(player, skinId, hasKey, hasFlag);
+            }
+        }
 
-        // Elegir sprites según si tiene llave
-        String walk = hasKey ? "Char_Carry_Key_Walk.png" : "Char_Walk.png";
-        String idle = hasKey ? "Char_Carry_Key_Idle.png" : "Char_Idle.png";
-        String attack = "Char_Attack.png";
-        String death = "Char_Death.png";
-
-        // Crear nuevo animador con los sprites correctos
-        PlayerAnimator animator = new PlayerAnimator(path, walk, idle, attack, death);
+        if (isLocal && textRenderer != null && playerData.has("points")) {
+            int newPoints = playerData.getInt("points");
+            textRenderer.setText("Points: " + newPoints);
+        }
 
         AnimationRenderer animationRenderer = player.getComponent(AnimationRenderer.class);
-        if (animationRenderer == null) return;
-
-        animationRenderer.animations.clear(); // Limpiar animaciones anteriores
-
-        for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
-            for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
-                animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
+        if (animationRenderer != null) {
+            if (dx == 0 && dy == 0) {
+                animationRenderer.play("IDLE_" + lastDirection.name());
+            } else {
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    lastDirection = dx > 0 ? PlayerAnimator.Direction.RIGHT : PlayerAnimator.Direction.LEFT;
+                } else {
+                    lastDirection = dy > 0 ? PlayerAnimator.Direction.UP : PlayerAnimator.Direction.DOWN;
+                }
+                animationRenderer.play("WALK_" + lastDirection.name());
             }
         }
-
-        animationRenderer.play("IDLE_DOWN");
     }
-
 
     private void updateOtherPlayers(JsonValue otherPlayersArray) {
         Set<String> currentPlayerIds = new HashSet<>();
 
         for (JsonValue playerData : otherPlayersArray) {
             String playerId = playerData.getString("id");
-            int skinId = playerData.has("skinId") ? playerData.getInt("skinId") : 1;
-            boolean hasKey = playerData.has("hasKey") && playerData.getBoolean("hasKey");
-            int points = playerData.has("points") ? playerData.getInt("points") : 0;
-            String nickname = playerData.getString("nickname", "Player");
             currentPlayerIds.add(playerId);
+
             GameObject otherPlayer = otherPlayers.get(playerId);
 
             if (otherPlayer == null) {
-                float x = playerData.getFloat("x");
-                float y = playerData.getFloat("y");
-
-                PlayerAnimator animator = createAnimatorForSkin(skinId, hasKey);
-                Animation<TextureRegion> initialAnimation = animator.getAnimation(PlayerAnimator.Action.IDLE, PlayerAnimator.Direction.DOWN);
-                TextureRegion initialFrame = initialAnimation.getKeyFrame(0);
-                AnimationRenderer animationRenderer = new AnimationRenderer(initialFrame);
-
-                for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
-                    for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
-                        animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
-                    }
-                }
-
-                GameObject newPlayer = new GameObject("player " + playerId);
-                Player playerComponent = new Player(playerId);
-                playerComponent.hasKey = hasKey;
-                playerComponent.skinId = skinId;
-                playerComponent.points = points;
-
-                newPlayer.addComponent(playerComponent);
-                newPlayer.addComponent(animationRenderer);
-                newPlayer.addComponent(new PositionSync());
-                newPlayer.transform.position.set(x, y);
-                newPlayer.transform.scale.set(4f, 4f);
-
-                TextRenderer nickRenderer = new TextRenderer(nickname);
-                nickRenderer.offsetY = 40f;
-                nickRenderer.fontScale = 0.3f;
-                newPlayer.addComponent(nickRenderer);
-
-                JsonValue moveVector = playerData.get("moveVector");
-                float dx = moveVector.getFloat("dx");
-                float dy = moveVector.getFloat("dy");
-
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    animationRenderer.play(dx > 0 ? "IDLE_RIGHT" : "IDLE_LEFT");
-                } else {
-                    animationRenderer.play(dy > 0 ? "IDLE_DOWN" : "IDLE_UP");
-                }
-
-                SceneSystem.activeScene.addGameObject(newPlayer);
-                otherPlayers.put(playerId, newPlayer);
-                Gdx.app.log("PlayerManager", "Created new player: " + playerId);
-
+                otherPlayer = createNewOtherPlayer(playerData);
+                otherPlayers.put(playerId, otherPlayer);
             } else {
-                Player playerComponent = otherPlayer.getComponent(Player.class);
-                if (playerComponent != null) {
-                    if (playerComponent.hasKey != hasKey) {
-                        playerComponent.hasKey = hasKey;
-                        changePlayerSprites(otherPlayer, playerComponent);
-                    }
-
-                    if (playerComponent.points != points) {
-                        playerComponent.points = points;
-                    }
-                }
-                // Update nickname text
-                TextRenderer nickRenderer = otherPlayer.getComponent(TextRenderer.class);
-                if (nickRenderer != null) {
-                    nickRenderer.setText(nickname);
-                } else {
-                    // Add if missing (should not happen often if added on creation)
-                    nickRenderer = new TextRenderer(nickname);
-                    nickRenderer.offsetY = 40f;
-                    nickRenderer.fontScale = 0.3f;
-                    otherPlayer.addComponent(nickRenderer);
-                }
                 updatePlayer(otherPlayer, playerData, false);
             }
         }
@@ -301,13 +175,128 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         });
     }
 
-    private PlayerAnimator createAnimatorForSkin(int skinId, boolean hasKey) {
+    private GameObject createNewOtherPlayer(JsonValue playerData) {
+        String playerId = playerData.getString("id");
+        float x = playerData.getFloat("x");
+        float y = playerData.getFloat("y");
+        int skinId = playerData.getInt("skinId", 1);
+        boolean hasKey = playerData.getBoolean("hasKey", false);
+        boolean hasFlag = playerData.getBoolean("hasFlag", false);
+        int teamId = playerData.getInt("teamId", 0);
+        String nickname = playerData.getString("nickname", "Player");
+
+        GameObject newPlayer = new GameObject("player " + playerId);
+
+        PlayerAnimator animator = createAnimatorForSkin(skinId, hasKey, hasFlag);
+        Animation<TextureRegion> idleDownAnim = animator.getAnimation(PlayerAnimator.Action.IDLE, PlayerAnimator.Direction.DOWN);
+        TextureRegion initialFrame = idleDownAnim.getKeyFrame(0);
+        AnimationRenderer animationRenderer = new AnimationRenderer(initialFrame);
+
+        for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
+            for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
+                animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
+            }
+        }
+        animationRenderer.play("IDLE_DOWN");
+
+        newPlayer.addComponent(new PositionSync());
+        newPlayer.addComponent(animationRenderer);
+        newPlayer.addComponent(new Player(playerId, skinId, hasKey, hasFlag, teamId));
+        newPlayer.transform.position.set(x, y);
+        newPlayer.transform.scale.set(4f, 4f);
+
+        ensureTextRenderers(newPlayer, nickname, teamId);
+
+        SceneSystem.activeScene.addGameObject(newPlayer);
+        return newPlayer;
+    }
+
+    private void ensureTextRenderers(GameObject player, String nickname, int teamId) {
+        TextRenderer teamText = player.getComponent(TextRenderer.class);
+        if (teamText == null) {
+            teamText = new TextRenderer(getTeamName(teamId));
+            teamText.offsetY = 70f;
+            teamText.fontScale = 0.3f;
+            player.addComponent(teamText);
+        } else {
+            teamText.setText(getTeamName(teamId));
+        }
+
+        TextRenderer nicknameText = player.getComponent(TextRenderer.class);
+        if (nicknameText == null) {
+            nicknameText = new TextRenderer(nickname);
+            nicknameText.offsetY = 40f;
+            nicknameText.fontScale = 0.3f;
+            player.addComponent(nicknameText);
+        } else {
+            nicknameText.setText(nickname);
+        }
+    }
+
+    private PlayerAnimator createAnimatorForSkin(int skinId, boolean hasKey, boolean hasFlag) {
         String path = "Characters/Character" + skinId + "/";
-        String walk = hasKey ? "Char_Carry_Key_Walk.png" : "Char_Walk.png";
-        String idle = hasKey ? "Char_Carry_Key_Idle.png" : "Char_Idle.png";
-        String attack = "Char_Attack.png";
-        String death = "Char_Death.png";
-        return new PlayerAnimator(path, walk, idle, attack, death);
+        String walk, idle;
+        if (hasFlag) {
+            walk = "Char_Carry_Flag_Walk.png";
+            idle = "Char_Carry_Flag_Idle.png";
+        } else if (hasKey) {
+            walk = "Char_Carry_Key_Walk.png";
+            idle = "Char_Carry_Key_Idle.png";
+        } else {
+            walk = "Char_Walk.png";
+            idle = "Char_Idle.png";
+        }
+        return new PlayerAnimator(path, walk, idle, "Char_Attack.png", "Char_Death.png");
+    }
+
+    private void updateAnimationRenderer(GameObject player, int skinId, boolean hasKey, boolean hasFlag) {
+        AnimationRenderer animationRenderer = player.getComponent(AnimationRenderer.class);
+        if (animationRenderer == null) return;
+
+        PlayerAnimator animator = createAnimatorForSkin(skinId, hasKey, hasFlag);
+
+        animationRenderer.clearAnimations();
+        for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
+            for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
+                animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
+            }
+        }
+        animationRenderer.play("IDLE_" + lastDirection.name());
+    }
+
+    private void createAnimationRenderer(GameObject player, JsonValue playerData) {
+        int skinId = playerData.getInt("skinId", 1);
+        boolean hasKey = playerData.getBoolean("hasKey", false);
+        boolean hasFlag = playerData.getBoolean("hasFlag", false);
+
+        PlayerAnimator animator = createAnimatorForSkin(skinId, hasKey, hasFlag);
+        Animation<TextureRegion> idleDownAnim = animator.getAnimation(PlayerAnimator.Action.IDLE, PlayerAnimator.Direction.DOWN);
+        TextureRegion initialFrame = idleDownAnim.getKeyFrame(0);
+        AnimationRenderer animationRenderer = new AnimationRenderer(initialFrame);
+
+        for (PlayerAnimator.Action action : PlayerAnimator.Action.values()) {
+            for (PlayerAnimator.Direction direction : PlayerAnimator.Direction.values()) {
+                animationRenderer.addAnimation(action.name() + "_" + direction.name(), animator.getAnimation(action, direction));
+            }
+        }
+        animationRenderer.play("IDLE_DOWN");
+
+        player.addComponent(animationRenderer);
+        player.addComponent(new Player(player.getName(), skinId, hasKey, hasFlag, 0));
+    }
+
+    private String getTeamName(int teamId) {
+        switch (teamId) {
+            case 0: return "Lornwood";
+            case 1: return "Vileswamp";
+            case 2: return "Asharid";
+            case 3: return "Ironhold";
+            default: return "Unknown";
+        }
+    }
+
+    public static void requestAttack() {
+        attackRequested = true;
     }
 
     @Override

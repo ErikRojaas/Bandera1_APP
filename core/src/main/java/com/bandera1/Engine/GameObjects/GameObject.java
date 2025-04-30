@@ -68,6 +68,14 @@ public class GameObject implements Serializable {
         component.gameObject = null;
     }
 
+    public final void show() {
+        enabled = true;
+    }
+
+    public final void hide() {
+        enabled = false;
+    }
+
     private GameObject deepClone() {
         try {
             // Serialize the object to a byte array
@@ -103,6 +111,7 @@ public class GameObject implements Serializable {
 
     public static GameObject instantiate(GameObject gameObject, Vector2 position, float rotation) {
         GameObject clone = gameObject.deepClone();
+        clone.id = UUID.randomUUID(); 
         clone.transform.position = position;
         clone.transform.rotation = rotation;
         for (Component component : clone.components) {
@@ -116,6 +125,7 @@ public class GameObject implements Serializable {
 
     public static GameObject instantiate(GameObject gameObject, float rotation) {
         GameObject clone = gameObject.deepClone();
+        clone.id = UUID.randomUUID(); 
         clone.transform.rotation = rotation;
         for (Component component : clone.components) {
             component.gameObject = clone;
@@ -128,6 +138,7 @@ public class GameObject implements Serializable {
 
     public static GameObject instantiate(GameObject gameObject, Vector2 position) {
         GameObject clone = gameObject.deepClone();
+        clone.id = UUID.randomUUID(); 
         clone.transform.position = position;
         for (Component component : clone.components) {
             component.gameObject = clone;
@@ -140,6 +151,7 @@ public class GameObject implements Serializable {
 
     public static GameObject instantiate(GameObject gameObject) {
         GameObject clone = gameObject.deepClone();
+        clone.id = UUID.randomUUID(); 
         for (Component component : clone.components) {
             component.gameObject = clone;
             component.init();
@@ -161,5 +173,14 @@ public class GameObject implements Serializable {
     public static void Destroy(GameObject gameObject) {
         SceneSystem.activeScene.removeGameObject(gameObject);
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getId() {
+        return id.toString();
+    }
+    
 }
 

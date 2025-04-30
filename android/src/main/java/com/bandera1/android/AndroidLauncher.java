@@ -7,6 +7,7 @@ import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.bandera1.Main;
 import com.github.czyzby.websocket.CommonWebSockets;
 
+
 /** Launches the Android application. */
 public class AndroidLauncher extends AndroidApplication {
     @Override
@@ -14,7 +15,11 @@ public class AndroidLauncher extends AndroidApplication {
         super.onCreate(savedInstanceState);
         AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
         configuration.useImmersiveMode = true; // Recommended, but not required.
-        initialize(new Main(), configuration);
+
+        Main main = new Main();
+        main.keyboardHelper = new AndroidKeyboardHelper(this);
+
+        initialize(main, configuration);
         CommonWebSockets.initiate();
     }
 }

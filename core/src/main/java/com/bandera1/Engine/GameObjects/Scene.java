@@ -37,8 +37,9 @@ public class Scene {
 
     public void update() {
         List<GameObject> objects = new ArrayList<>(this.gameObjects);
+        //filter enabled objects
+        objects.removeIf(gameObject -> !gameObject.enabled);
         for (GameObject gameObject : objects) {
-            if (!gameObject.enabled) continue;
             for (Component component : gameObject.components) {
                 component.update();
             }

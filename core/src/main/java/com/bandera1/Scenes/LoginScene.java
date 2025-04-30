@@ -4,9 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
 import com.bandera1.Components.ObjectHideShowButton;
 import com.bandera1.Components.SceneChangingButton;
+import com.bandera1.Engine.GameObjects.AnimationRenderer;
 import com.bandera1.Engine.GameObjects.ClickableUrlRenderer;
 import com.bandera1.Engine.GameObjects  .GameObject;
 import com.bandera1.Engine.GameObjects.RectangleCollider;
@@ -28,6 +33,26 @@ public class LoginScene extends Scene {
          */
         float labelOffsetX = 0;
         float labelOffsetY = 50f;
+        
+        //Background
+        GameObject background = new GameObject("background");
+
+        int frameCount = 10;
+        Array<TextureRegion> frames = new Array<>();
+        for (int i = 0; i < frameCount; i++) {
+            Texture texture = new Texture(Gdx.files.internal("MainMenuBackground/frame" + i + ".png"));
+            texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            frames.add(new TextureRegion(texture));
+        }
+        Animation<TextureRegion> backgroundAnimation = new Animation<>(0.08f, frames, Animation.PlayMode.LOOP);
+        AnimationRenderer backgroundAnimationRenderer = new AnimationRenderer(backgroundAnimation.getKeyFrame(0));
+
+        backgroundAnimationRenderer.addAnimation("titleAnimation", backgroundAnimation);
+        background.addComponent(backgroundAnimationRenderer);
+        backgroundAnimationRenderer.play("titleAnimation");
+        background.transform.position.set(0, 0);
+        background.transform.scale.set(1.4f, 1.4f);
+        addGameObject(background);
 
         //Login Form Elements
         GameObject loginEmail = new GameObject("loginEmail");

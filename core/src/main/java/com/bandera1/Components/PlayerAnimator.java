@@ -96,3 +96,13 @@ public class PlayerAnimator {
         Gdx.app.debug("PlayerAnimator", "Disposed all cached textures.");
     }
 }
+
+
+
+/*
+ KNOWN BUGS
+ -No se porque el sprite de caminar arriba y abajo no funciona
+ -A la hora de reducir la velocidad como que el jugaodor tiene momentum y cuando cambia a la posicion opuesta va MUCHO mas lento
+ -A la hora de acabar la partida si el jugador si queda esperando a la siguiente a veces lo manda a tomar por el culo y la pantalla sale en negro  
+ -A la hora de acabar la partida si el jugador si queda esperando a la siguiente la posicion no se resetea y mantiene la posicion de la partida anterior
+ */

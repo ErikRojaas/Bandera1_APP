@@ -90,6 +90,9 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         JsonValue moveVector = playerData.get("moveVector");
         float dx = moveVector.getFloat("dx");
         float dy = moveVector.getFloat("dy");
+        JsonValue speedVector = playerData.get("speedVector");
+        float speedX = speedVector.getFloat("speedX");
+        float speedY = speedVector.getFloat("speedY");
         String nickname = playerData.getString("nickname", isLocal ? "You" : "Player");
         int teamId = playerData.getInt("teamId", 0);
         int skinId = playerData.getInt("skinId", 1);
@@ -99,17 +102,8 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         PositionSync positionSync = player.getComponent(PositionSync.class);
         if (positionSync != null) {
             positionSync.targetPosition.set(x, y);
-
-            // Reducir velocidad si lleva llave o bandera
-            float finalDx = dx;
-            float finalDy = dy;
-            if (hasKey || hasFlag) {
-                finalDx *= 0.75f; 
-                finalDy *= 0.75f;
-            }
-            positionSync.velocity.set(finalDx, finalDy);
-
-            positionSync.snap = (dx == 0 && dy == 0);
+            positionSync.velocity.set(speedX, speedY);
+            positionSync.snap = (speedX == 0 && speedY == 0);
         }
 
         Player playerComponent = player.getComponent(Player.class);
@@ -146,7 +140,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                 }
                 animationRenderer.play("WALK_" + lastDirection.name());
             }
-        }
+        } 
     }
 
     private void updateOtherPlayers(JsonValue otherPlayersArray) {

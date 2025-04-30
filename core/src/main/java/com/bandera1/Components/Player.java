@@ -10,8 +10,8 @@ public class Player extends Component {
     public boolean hasFlag = false;
     public int points = 0;
     public int teamId;
-
-    // NUEVO
+    public boolean isAttacking = false;
+    public float attackCooldown = 0f;
     public int health = 3;
     public boolean isDead = false;
     public float respawnTimeLeft = 0f;

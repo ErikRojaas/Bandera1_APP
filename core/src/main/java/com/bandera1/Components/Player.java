@@ -7,12 +7,23 @@ public class Player extends Component {
     public String name;
     public int skinId = 1; 
     public boolean hasKey = false;
+    public boolean hasFlag = false;
     public int points = 0;
+    public int teamId;
+    public boolean isAttacking = false;
+    public float attackCooldown = 0f;
+    public int health = 3;
+    public boolean isDead = false;
+    public float respawnTimeLeft = 0f;
 
     public Player() {}
 
-    public Player(String id) {
+    public Player(String id, int skinId, boolean hasKey, boolean hasFlag, int teamId) {
         this.id = id;
+        this.skinId = skinId;
+        this.hasKey = hasKey;
+        this.hasFlag = hasFlag;
+        this.teamId = teamId;
     }
 
     public Player(String id, int skinId) {
@@ -20,3 +31,4 @@ public class Player extends Component {
         this.skinId = skinId;
     }
 }
+

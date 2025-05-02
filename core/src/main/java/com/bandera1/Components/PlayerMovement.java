@@ -38,8 +38,8 @@ public class PlayerMovement extends Component {
             //get the direction as a string for the server
             JsonValue data = new JsonValue(JsonValue.ValueType.object);
             JsonValue directionJson = new JsonValue(JsonValue.ValueType.object);
-            directionJson.addChild("dx",new JsonValue(direction.x*300));
-            directionJson.addChild("dy",new JsonValue(direction.y*300));
+            directionJson.addChild("dx",new JsonValue(direction.x*1.0));
+            directionJson.addChild("dy",new JsonValue(direction.y*1.0));
             data.addChild("direction",directionJson);
             Gdx.app.log("PlayerMovement",directionJson.toString());
             //send the direction to the server

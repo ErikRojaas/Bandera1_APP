@@ -1,6 +1,7 @@
 package com.bandera1.Components;
 
 import com.bandera1.Engine.GameObjects.AnimationRenderer;
+import com.bandera1.Engine.GameObjects.CircleCollider;
 import com.bandera1.Engine.GameObjects.Component;
 import com.bandera1.Engine.GameObjects.GameObject;
 import com.bandera1.Engine.Systems.SceneSystem;
@@ -67,7 +68,8 @@ public class FlagManager extends Component implements WebSocketEventListener {
                 renderer.play("idle");
 
                 flag.addComponent(renderer);
-                flag.addComponent(new Flag()); 
+                flag.addComponent(new Flag());
+                flag.addComponent(new CircleCollider(30));
                 flag.transform.position = new Vector2(flagData.getFloat("x"), flagData.getFloat("y"));
                 flag.transform.scale.set(2, 2f);
 
@@ -75,7 +77,6 @@ public class FlagManager extends Component implements WebSocketEventListener {
                 Gdx.app.log("FlagManager", "Created flag: " + flagId);
                 flags.put(flagId, flag);
             }
-        }
 
         // Eliminar banderas que ya no están
         flags.entrySet().removeIf(entry -> {
@@ -85,6 +86,7 @@ public class FlagManager extends Component implements WebSocketEventListener {
             }
             return false;
         });
+    }
     }
 
     @Override

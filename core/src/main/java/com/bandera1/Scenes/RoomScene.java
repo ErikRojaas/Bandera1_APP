@@ -1,5 +1,6 @@
 package com.bandera1.Scenes;
 
+import com.bandera1.Engine.GameObjects.AnimationRenderer;
 import com.bandera1.Engine.GameObjects.GameObject;
 import com.bandera1.Engine.GameObjects.RectangleCollider;
 import com.bandera1.Engine.GameObjects.Scene;
@@ -7,7 +8,9 @@ import com.bandera1.Engine.GameObjects.TextRenderer;
 import com.bandera1.Engine.GameObjects.TextureRenderer;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
 import com.bandera1.Components.LastWinnerManager;
 import com.bandera1.Components.PlayerCountText;
 import com.bandera1.Components.SceneChangingButton;
@@ -17,7 +20,28 @@ public class RoomScene extends Scene {
 
     public RoomScene() {
         super();
+        float labelOffsetX = 0;
+        float labelOffsetY = 50f;
+
         // Background
+        GameObject background = new GameObject("background");
+
+        int frameCount = 10;
+        Array<TextureRegion> frames = new Array<>();
+        for (int i = 0; i < frameCount; i++) {
+            Texture texture = new Texture(Gdx.files.internal("MainMenuBackground/frame" + i + ".png"));
+            texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            frames.add(new TextureRegion(texture));
+        }
+        Animation<TextureRegion> backgroundAnimation = new Animation<>(0.08f, frames, Animation.PlayMode.LOOP);
+        AnimationRenderer backgroundAnimationRenderer = new AnimationRenderer(backgroundAnimation.getKeyFrame(0));
+
+        backgroundAnimationRenderer.addAnimation("titleAnimation", backgroundAnimation);
+        background.addComponent(backgroundAnimationRenderer);
+        backgroundAnimationRenderer.play("titleAnimation");
+        background.transform.position.set(0, 0);
+        background.transform.scale.set(1.4f, 1.4f);
+        addGameObject(background);
 
         // Player Text
         GameObject playerCountText = new GameObject("playerCountText");
@@ -46,6 +70,9 @@ public class RoomScene extends Scene {
         GameObject backBottomText = new GameObject("backBottomText");
         backBottomText.addComponent(new TextRenderer("Back to menu"));
         backBottomText.addComponent(new TextureRenderer(new Texture("button.jpg")));
+        TextRenderer backLabel = new TextRenderer("Back to Menu");
+        backLabel.offsetX = labelOffsetX;
+        backLabel.offsetY = labelOffsetY;
         backBottomText.addComponent(new RectangleCollider(100, 50));
         backBottomText.addComponent(new SceneChangingButton("Menu"));
         backBottomText.transform.position.set(-350, -200);

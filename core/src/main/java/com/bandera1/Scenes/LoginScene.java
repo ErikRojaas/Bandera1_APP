@@ -7,6 +7,8 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Texture;
 import com.bandera1.Components.ObjectHideShowButton;
 import com.bandera1.Components.SceneChangingButton;
+import com.bandera1.Components.LoginLogic;
+import com.bandera1.Components.RegisterLogic;
 import com.bandera1.Engine.GameObjects.ClickableUrlRenderer;
 import com.bandera1.Engine.GameObjects  .GameObject;
 import com.bandera1.Engine.GameObjects.RectangleCollider;
@@ -14,6 +16,7 @@ import com.bandera1.Engine.GameObjects.Scene;
 import com.bandera1.Engine.GameObjects.TextRenderer;
 import com.bandera1.Engine.GameObjects.Textfield;
 import com.bandera1.Engine.GameObjects.TextureRenderer;
+import com.bandera1.Engine.GameObjects.Checkbox;
 
 public class LoginScene extends Scene {
     public LoginScene() {
@@ -56,7 +59,8 @@ public class LoginScene extends Scene {
         confirmLoginText.fontScale = 0.8f;
         confirmLoginButton.addComponent(confirmLoginText);
         confirmLoginButton.addComponent(new RectangleCollider(100, 50));
-        // TODO: Add login logic component
+        // Add login logic component
+        confirmLoginButton.addComponent(new LoginLogic());
         confirmLoginButton.transform.position.set(0, -50);
         confirmLoginButton.transform.scale.set(2f, 2f);
         addGameObject(confirmLoginButton);
@@ -134,16 +138,26 @@ public class LoginScene extends Scene {
         confirmRegisterText.fontScale = 0.7f;
         confirmRegisterButton.addComponent(confirmRegisterText);
         confirmRegisterButton.addComponent(new RectangleCollider(100, 50));
-        // TODO: Add registration logic component
+        // Add registration logic component
+        confirmRegisterButton.addComponent(new RegisterLogic());
         confirmRegisterButton.transform.position.set(registerCol2X, -50);
         confirmRegisterButton.transform.scale.set(2f, 2f);
         confirmRegisterButton.enabled = false;
         addGameObject(confirmRegisterButton);
 
+        // Terms of Service checkbox and link
+        GameObject termsCheckbox = new GameObject("termsCheckbox");
+        termsCheckbox.addComponent(new Checkbox(new Texture("checkbox_unchecked.png"), new Texture("checkbox_checked.png")));
+        termsCheckbox.transform.position.set(-190, -120);
+        termsCheckbox.transform.scale.set(0.2f, 0.2f);
+        termsCheckbox.enabled = false;
+        addGameObject(termsCheckbox);
+
         GameObject termsOfServiceLink = new GameObject("termsOfServiceLink");
-        termsOfServiceLink.addComponent(new ClickableUrlRenderer("Terms of Service", "http://bandera1.ieti.site/terms_of_services"));
-        termsOfServiceLink.transform.position.set(0, -120);
+        termsOfServiceLink.addComponent(new ClickableUrlRenderer("I accept the Terms of Service", "http://bandera1.ieti.site/terms_of_services"));
+        termsOfServiceLink.transform.position.set(30, -120);
         termsOfServiceLink.transform.scale.set(2, 2);
+        termsOfServiceLink.enabled = false; // Initially disabled as part of register view
         addGameObject(termsOfServiceLink);
 
         GameObject loginButton = new GameObject("loginButton"); // Button to switch TO login view
@@ -169,9 +183,12 @@ public class LoginScene extends Scene {
 
         // Define elements for each view
         List<String> loginViewElements = Arrays.asList("loginEmail", "loginPassword", "confirmLoginButton", "registerButton");
-        List<String> registerViewElements = Arrays.asList("registerNickname", "registerEmail", "registerPhone", "registerPassword", "registerPasswordConfirmation", "confirmRegisterButton", "loginButton");
+        List<String> registerViewElements = Arrays.asList("registerNickname", "registerEmail", "registerPhone", 
+                "registerPassword", "registerPasswordConfirmation", "confirmRegisterButton", "loginButton", 
+                "termsCheckbox", "termsOfServiceLink");
+        
         // Add view switching logic to buttons
-        loginButton.addComponent(new ObjectHideShowButton(registerViewElements.subList(0, 6), loginViewElements, true));
+        loginButton.addComponent(new ObjectHideShowButton(registerViewElements, loginViewElements, true));
         registerButton.addComponent(new ObjectHideShowButton(loginViewElements.subList(0, 3), registerViewElements, true));
     }
 }

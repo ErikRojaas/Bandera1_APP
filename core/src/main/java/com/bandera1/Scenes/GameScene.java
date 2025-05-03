@@ -5,6 +5,7 @@ import com.bandera1.Engine.GameObjects.GameObject;
 import com.bandera1.Engine.GameObjects.Scene;
 import com.bandera1.Engine.GameObjects.TextureRenderer;
 import com.bandera1.Engine.GameObjects.TextRenderer;
+import com.bandera1.Engine.GameObjects.ImageRenderer;
 import com.bandera1.Components.*;
 
 import com.badlogic.gdx.graphics.Texture;
@@ -34,6 +35,7 @@ public class GameScene extends Scene {
         player.addComponent(new PlayerMovement());
         player.addComponent(new PositionSync());
         player.addComponent(new FollowCamera());
+        player.addComponent(new RandomCircleCamera());
         player.transform.scale.set(4f, 4f);
         addGameObject(player);
 
@@ -53,5 +55,17 @@ public class GameScene extends Scene {
         playerPointsText.addComponent(playerPointsTextRenderer);
         playerPointsText.transform.scale.set(5, 5);
         addGameObject(playerPointsText);
+
+        // Life Indicator (HUD)
+        GameObject lifeIndicator = new GameObject("lifeIndicator");
+        ImageRenderer heartImage = new ImageRenderer(new Texture("heart.png"), 64, 64); // 64x64 size, adjust as needed
+        heartImage.setScreenPosition(100, 1000); // Top-left corner
+        lifeIndicator.addComponent(heartImage);
+
+        TextRenderer healthText = new TextRenderer("100"); // Default value, should be updated from server
+        healthText.setScreenPosition(180, 1000); // To the right of the heart image
+        lifeIndicator.addComponent(healthText);
+        lifeIndicator.transform.scale.set(4, 4); // Adjust scale as needed
+        addGameObject(lifeIndicator);
     }
 }

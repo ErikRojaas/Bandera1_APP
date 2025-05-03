@@ -24,6 +24,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     private TextRenderer textRenderer;
     private boolean active;
     private PlayerAnimator.Direction lastDirection = PlayerAnimator.Direction.DOWN;
+    private TextRenderer healthTextRenderer; // For HUD life indicator
 
     public static boolean attackRequested = false;
     private boolean isAttacking = false;
@@ -44,6 +45,12 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         active = true;
         player = GameObject.Find("player");
         textRenderer = GameObject.Find("playerPointsText").getComponent(TextRenderer.class);
+
+        // Get the healthText TextRenderer from the lifeIndicator GameObject
+        GameObject lifeIndicator = GameObject.Find("lifeIndicator");
+        if (lifeIndicator != null) {
+            healthTextRenderer = lifeIndicator.getComponent(TextRenderer.class);
+        }
 
         GameObject attackButtonObj = new GameObject("attackButton");
         attackButtonObj.addComponent(new AttackButton());
@@ -78,6 +85,20 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
             if (data.has("otherPlayers")) {
                 updateOtherPlayers(data.get("otherPlayers"));
+            }
+        }
+        // Handle death message
+        if (message.type.equals("death")) {
+            RandomCircleCamera rcc = player.getComponent(RandomCircleCamera.class);
+            if (rcc != null) {
+                rcc.active = true;
+                Gdx.app.postRunnable(() -> {
+                    // Schedule deactivation after 2 seconds
+                    new Thread(() -> {
+                        try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+                        Gdx.app.postRunnable(() -> rcc.active = false);
+                    }).start();
+                });
             }
         }
     }
@@ -121,6 +142,12 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         if (isLocal && textRenderer != null && playerData.has("points")) {
             int points = playerData.getInt("points");
             textRenderer.setText("Points: " + points);
+        }
+
+        // Update health HUD if available
+        if (isLocal && healthTextRenderer != null && playerData.has("life")) {
+            int health = playerData.getInt("life");
+            healthTextRenderer.setText(String.valueOf(health));
         }
 
         AnimationRenderer renderer = player.getComponent(AnimationRenderer.class);

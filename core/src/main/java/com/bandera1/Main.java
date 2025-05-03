@@ -61,8 +61,7 @@ public class Main extends ApplicationAdapter {
 
     /*
      * TODO LIST
-     * 3. add winner text
-     * 1. add flag to web app,
-     * 2. add timer to web app,
+     * - LifeBar rendering
+     * - Death animation
      */
 }

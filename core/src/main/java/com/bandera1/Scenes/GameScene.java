@@ -58,12 +58,12 @@ public class GameScene extends Scene {
 
         // Life Indicator (HUD)
         GameObject lifeIndicator = new GameObject("lifeIndicator");
-        ImageRenderer heartImage = new ImageRenderer(new Texture("Life_Bar.png"), 64, 64); // 64x64 size, adjust as needed
-        heartImage.setScreenPosition(100, 1000); // Top-left corner
+        ImageRenderer heartImage = new ImageRenderer(new Texture("Life_Bar.png"), 110, 110);
+        heartImage.setScreenPosition(50, 950); // Top-left corner
         lifeIndicator.addComponent(heartImage);
 
         TextRenderer healthText = new TextRenderer("100"); // Default value, should be updated from server
-        healthText.setScreenPosition(180, 1000); // To the right of the heart image
+        healthText.setScreenPosition(82, 990); // To the right of the heart image
         lifeIndicator.addComponent(healthText);
         lifeIndicator.transform.scale.set(4, 4); // Adjust scale as needed
         addGameObject(lifeIndicator);

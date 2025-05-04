@@ -91,7 +91,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                 rcc.active = true;
                 Gdx.app.postRunnable(() -> {
                     new Thread(() -> {
-                        try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+                        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
                         Gdx.app.postRunnable(() -> rcc.active = false);
                     }).start();
                 });

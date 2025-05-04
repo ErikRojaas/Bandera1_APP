@@ -122,7 +122,7 @@ public class LoginLogic extends Component implements WebSocketEventListener {
 
     @Override
     public void onMessage(ServerMessage message) {
-        if (message.type.equals("login_result")) {
+        if (message.type.equals("login")) {
             boolean success = message.data.getBoolean("success", false);
             if (success) {
                 Gdx.app.log("LoginLogic", "Login successful");

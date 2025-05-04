@@ -1,5 +1,6 @@
 package com.bandera1.Engine.Systems;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import java.util.HashSet;
@@ -88,6 +89,14 @@ public class InputSystem implements InputProcessor {
         return SceneSystem.ScreenToWorldPoint(new Vector2(touchX, touchY)).y;
     }
 
+    public static float getTouchX(int pointer) {
+        return Gdx.input.getX(pointer);
+    }
+
+    public static float getTouchY(int pointer) {
+        return Gdx.input.getY(pointer);
+    }
+    
     public static int getTouchButton() {
         return touchButton;
     }

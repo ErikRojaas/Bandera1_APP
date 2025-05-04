@@ -40,8 +40,8 @@ public class RectangleCollider extends Collider {
         if (otherClass == RectangleCollider.class) {
             return collider.overlaps(((RectangleCollider) other).collider);
         } else if (otherClass == CircleCollider.class) {
-            return Intersector.overlaps(collider, ((RectangleCollider) other).collider);
-        }
+            CircleCollider circle = (CircleCollider) other;
+            return Intersector.overlaps(circle.collider, collider);        }
         return false;
     }
 

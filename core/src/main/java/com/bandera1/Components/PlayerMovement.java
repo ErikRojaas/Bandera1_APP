@@ -14,6 +14,7 @@ import java.lang.Math;
 public class PlayerMovement extends Component {
 
     ServerUtils server;
+    
     AnimationRenderer animationRenderer;
 
     @Override

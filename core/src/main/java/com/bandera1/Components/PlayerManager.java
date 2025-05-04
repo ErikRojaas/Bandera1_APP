@@ -1,8 +1,6 @@
 package com.bandera1.Components;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
@@ -22,9 +20,9 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     private GameObject player;
     private Map<String, GameObject> otherPlayers;
     private TextRenderer textRenderer;
+    private TextRenderer healthTextRenderer;
     private boolean active;
     private PlayerAnimator.Direction lastDirection = PlayerAnimator.Direction.DOWN;
-    private TextRenderer healthTextRenderer; // For HUD life indicator
 
     public static boolean attackRequested = false;
     private boolean isAttacking = false;
@@ -46,7 +44,6 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         player = GameObject.Find("player");
         textRenderer = GameObject.Find("playerPointsText").getComponent(TextRenderer.class);
 
-        // Get the healthText TextRenderer from the lifeIndicator GameObject
         GameObject lifeIndicator = GameObject.Find("lifeIndicator");
         if (lifeIndicator != null) {
             healthTextRenderer = lifeIndicator.getComponent(TextRenderer.class);
@@ -87,13 +84,12 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                 updateOtherPlayers(data.get("otherPlayers"));
             }
         }
-        // Handle death message
+
         if (message.type.equals("death")) {
             RandomCircleCamera rcc = player.getComponent(RandomCircleCamera.class);
             if (rcc != null) {
                 rcc.active = true;
                 Gdx.app.postRunnable(() -> {
-                    // Schedule deactivation after 2 seconds
                     new Thread(() -> {
                         try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
                         Gdx.app.postRunnable(() -> rcc.active = false);
@@ -144,7 +140,6 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             textRenderer.setText("Points: " + points);
         }
 
-        // Update health HUD if available
         if (isLocal && healthTextRenderer != null && playerData.has("life")) {
             int health = playerData.getInt("life");
             healthTextRenderer.setText(String.valueOf(health));
@@ -160,6 +155,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                 attackTimer -= delta;
                 if (attackTimer <= 0f) {
                     isAttacking = false;
+                    if (playerComp != null) playerComp.isAttacking = false;
                 }
             }
 
@@ -176,14 +172,42 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
             if (isLocal && attackRequested && attackCooldown <= 0f && !isAttacking) {
                 attackRequested = false;
-                if (playerComp == null /* || playerComp.isDead */) return;
+                if (playerComp == null || playerComp.hasKey || playerComp.hasFlag /* || playerComp.isDead */) return;
 
                 renderer.play("ATTACK_" + lastDirection.name());
                 isAttacking = true;
+                playerComp.isAttacking = true;
                 attackTimer = attackAnimDuration;
                 attackCooldown = attackCooldownTime;
 
                 checkForHit();
+            }
+        }
+    }
+
+    private void checkForHit() {
+        Vector2 origin = new Vector2(player.transform.position);
+        Vector2 dir = new Vector2(0, 0);
+        switch (lastDirection) {
+            case UP: dir.y = 1; break;
+            case DOWN: dir.y = -1; break;
+            case LEFT: dir.x = -1; break;
+            case RIGHT: dir.x = 1; break;
+        }
+
+        Vector2 attackPos = origin.add(dir.scl(attackRange));
+
+        for (GameObject enemy : otherPlayers.values()) {
+            Player enemyComp = enemy.getComponent(Player.class);
+            if (enemyComp == null || enemyComp.teamId == player.getComponent(Player.class).teamId) continue;
+
+            float dist = enemy.transform.position.dst(attackPos);
+            if (dist < attackRange) {
+                Gdx.app.log("ATTACK", "Golpeaste a " + enemy.getName());
+
+                JsonValue data = new JsonValue(JsonValue.ValueType.object);
+                data.addChild("targetId", new JsonValue(enemyComp.id));
+                ServerUtils.instance.send(new ServerMessage("damage", data));
             }
         }
     }
@@ -222,7 +246,6 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         String nickname = data.getString("nickname", "Player");
 
         GameObject obj = new GameObject("player " + id);
-
         PlayerAnimator animator = createAnimatorForSkin(skinId, hasKey, hasFlag);
         AnimationRenderer renderer = new AnimationRenderer(animator.getAnimation(PlayerAnimator.Action.IDLE, PlayerAnimator.Direction.DOWN).getKeyFrame(0));
 
@@ -263,38 +286,6 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             player.addComponent(nameText);
         } else {
             nameText.setText(nickname);
-        }
-    }
-
-    private void checkForHit() {
-        Vector2 origin = new Vector2(player.transform.position);
-        Vector2 dir = new Vector2(0, 0);
-        switch (lastDirection) {
-            case UP:
-                dir.y = 1;
-                break;
-            case DOWN:
-                dir.y = -1;
-                break;
-            case LEFT:
-                dir.x = -1;
-                break;
-            case RIGHT:
-                dir.x = 1;
-                break;
-        }
-
-        Vector2 attackPos = origin.add(dir.scl(attackRange));
-
-        for (GameObject enemy : otherPlayers.values()) {
-            Player enemyComp = enemy.getComponent(Player.class);
-            if (enemyComp == null || enemyComp.teamId == player.getComponent(Player.class).teamId) continue;
-
-            float dist = enemy.transform.position.dst(attackPos);
-            if (dist < attackRange) {
-                Gdx.app.log("ATTACK", "Golpeaste a " + enemy.getName());
-                // TODO: enviar mensaje al servidor
-            }
         }
     }
 

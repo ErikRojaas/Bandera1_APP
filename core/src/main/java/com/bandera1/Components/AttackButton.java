@@ -10,33 +10,42 @@ import com.badlogic.gdx.Gdx;
 
 public class AttackButton extends Component {
     private ImageRenderer imageRenderer;
+    public static boolean touchedThisFrame = false;
+
+    public static boolean isTouchingButton(Vector2 touch) {
+        float posX = SceneSystem.width - 400f;
+        float posY = 60f;
+        float width = 300f;
+        float height = 300f;
+
+        return touch.x >= posX && touch.x <= posX + width &&
+               touch.y >= posY && touch.y <= posY + height;
+    }
 
     @Override
     public void init() {
         Texture buttonTexture = new Texture(Gdx.files.internal("attack_button.png"));
 
-        // Redimensionar el botón a algo más pequeño y cómodo
         float width = 300f;
         float height = 300f;
 
         imageRenderer = new ImageRenderer(buttonTexture, width, height);
         gameObject.addComponent(imageRenderer);
 
-        // Posición visible: esquina inferior derecha
-        float posX = SceneSystem.width - 400f; // 800 - 60
+        float posX = SceneSystem.width - 400f;
         float posY = 60f;
         imageRenderer.setScreenPosition(posX, posY);
     }
 
     @Override
     public void update() {
-        Gdx.app.log("AttackButton", "Update ejecutado");
+        touchedThisFrame = false;
 
         if (Gdx.input.justTouched()) {
             Vector2 touch = new Vector2(Gdx.input.getX(), SceneSystem.height - Gdx.input.getY());
 
-            if (imageRenderer.isTouched(touch.x, touch.y)) {
-                Gdx.app.log("AttackButton", "Botón de ataque pulsado");
+            if (isTouchingButton(touch)) {
+                touchedThisFrame = true;
                 PlayerManager.requestAttack();
             }
         }

@@ -120,21 +120,19 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             positionSync.velocity.set(speedX, speedY);
             positionSync.snap = (speedX == 0 && speedY == 0);
         }
+        ensureTextRenderers(player, nickname, teamId);
+        if (!isLocal)
+            updateAnimationRenderer(player, skinId, hasKey, hasFlag);
 
         Player playerComp = player.getComponent(Player.class);
+        
         if (playerComp != null) {
-            if (playerComp.teamId != teamId) {
-                playerComp.teamId = teamId;
-                ensureTextRenderers(player, nickname, teamId);
-            }
-            if (playerComp.skinId != skinId || playerComp.hasKey != hasKey || playerComp.hasFlag != hasFlag) {
-                playerComp.skinId = skinId;
-                playerComp.hasKey = hasKey;
-                playerComp.hasFlag = hasFlag;
-                updateAnimationRenderer(player, skinId, hasKey, hasFlag);
-            }
+            playerComp.teamId = teamId;
+            playerComp.skinId = skinId;
+            playerComp.hasKey = hasKey;
+            playerComp.hasFlag = hasFlag;
         }
-
+        
         if (isLocal && textRenderer != null && playerData.has("points")) {
             int points = playerData.getInt("points");
             textRenderer.setText("Points: " + points);
@@ -268,6 +266,7 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     }
 
     private void ensureTextRenderers(GameObject player, String nickname, int teamId) {
+        Gdx.app.log("PlayerManager", "ensureTextRenderers");
         TextRenderer teamText = player.getComponent(TextRenderer.class);
         if (teamText == null) {
             teamText = new TextRenderer(getTeamName(teamId));

@@ -23,6 +23,16 @@ public class InputSystem implements InputProcessor {
     private static boolean mouseMoved = false;
     private static boolean scrolled = false;
 
+    // Multi-touch support
+    private static class TouchInfo {
+        boolean isTouching = false;
+        boolean justTouched = false;
+        boolean justReleased = false;
+        float x = -1, y = -1;
+        int button = -1;
+    }
+    private static java.util.Map<Integer, TouchInfo> touches = new java.util.HashMap<>();
+
     // Key input methods
     public static boolean onKeyDown(int keycode) {
         return keysDown.contains(keycode);
@@ -89,14 +99,6 @@ public class InputSystem implements InputProcessor {
         return SceneSystem.ScreenToWorldPoint(new Vector2(touchX, touchY)).y;
     }
 
-    public static float getTouchX(int pointer) {
-        return Gdx.input.getX(pointer);
-    }
-
-    public static float getTouchY(int pointer) {
-        return Gdx.input.getY(pointer);
-    }
-    
     public static int getTouchButton() {
         return touchButton;
     }
@@ -131,6 +133,30 @@ public class InputSystem implements InputProcessor {
         return scrollY;
     }
 
+    // Multi-touch input methods
+    public static boolean onTouchDown(int pointer) {
+        TouchInfo info = touches.get(pointer);
+        return info != null && info.justTouched;
+    }
+    public static boolean onTouch(int pointer) {
+        TouchInfo info = touches.get(pointer);
+        return info != null && info.isTouching;
+    }
+    public static boolean onTouchUp(int pointer) {
+        TouchInfo info = touches.get(pointer);
+        return info != null && info.justReleased;
+    }
+    public static Vector2 getTouchPosition(int pointer) {
+        TouchInfo info = touches.get(pointer);
+        if (info == null) return null;
+        return SceneSystem.ScreenToWorldPoint(new Vector2(info.x, info.y));
+    }
+    public static int getTouchButton(int pointer) {
+        TouchInfo info = touches.get(pointer);
+        if (info == null) return -1;
+        return info.button;
+    }
+
     @Override
     public boolean keyDown(int keycode) {
         if (!keys.contains(keycode)) {
@@ -149,6 +175,17 @@ public class InputSystem implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        // Multi-touch
+        TouchInfo info = touches.get(pointer);
+        if (info == null) info = new TouchInfo();
+        info.isTouching = true;
+        info.justTouched = true;
+        info.justReleased = false;
+        info.x = screenX;
+        info.y = screenY;
+        info.button = button;
+        touches.put(pointer, info);
+        // Old API (primary touch)
         isTouching = true;
         justTouched = true;
         touchX = screenX;
@@ -159,6 +196,17 @@ public class InputSystem implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        // Multi-touch
+        TouchInfo info = touches.get(pointer);
+        if (info == null) info = new TouchInfo();
+        info.isTouching = false;
+        info.justTouched = false;
+        info.justReleased = true;
+        info.x = screenX;
+        info.y = screenY;
+        info.button = button;
+        touches.put(pointer, info);
+        // Old API (primary touch)
         isTouching = false;
         justReleased = true;
         touchButton = button;
@@ -167,6 +215,17 @@ public class InputSystem implements InputProcessor {
 
     @Override
     public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+        // Multi-touch
+        TouchInfo info = touches.get(pointer);
+        if (info == null) info = new TouchInfo();
+        info.isTouching = false;
+        info.justTouched = false;
+        info.justReleased = true;
+        info.x = screenX;
+        info.y = screenY;
+        info.button = button;
+        touches.put(pointer, info);
+        // Old API (primary touch)
         isTouching = false;
         justReleased = true;
         return true;
@@ -174,6 +233,13 @@ public class InputSystem implements InputProcessor {
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
+        // Multi-touch
+        TouchInfo info = touches.get(pointer);
+        if (info == null) info = new TouchInfo();
+        info.x = screenX;
+        info.y = screenY;
+        touches.put(pointer, info);
+        // Old API (primary touch)
         touchX = screenX;
         touchY = screenY;
         return true;
@@ -203,8 +269,14 @@ public class InputSystem implements InputProcessor {
             touchButton = -1;
         justTouched = false;
         justReleased = false;
-
-
+        // Multi-touch: reset per-pointer justTouched/justReleased
+        for (TouchInfo info : touches.values()) {
+            info.justTouched = false;
+            info.justReleased = false;
+            if (!info.isTouching) {
+                info.button = -1;
+            }
+        }
         mouseMoved = false;
         scrolled = false;
         scrollX = 0;

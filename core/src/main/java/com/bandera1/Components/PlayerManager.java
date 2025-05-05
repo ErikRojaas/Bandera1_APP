@@ -48,10 +48,6 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         if (lifeIndicator != null) {
             healthTextRenderer = lifeIndicator.getComponent(TextRenderer.class);
         }
-
-        GameObject attackButtonObj = new GameObject("attackButton");
-        attackButtonObj.addComponent(new AttackButton());
-        SceneSystem.activeScene.addGameObject(attackButtonObj);
     }
 
     @Override
@@ -125,14 +121,14 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             updateAnimationRenderer(player, skinId, hasKey, hasFlag);
 
         Player playerComp = player.getComponent(Player.class);
-        
+
         if (playerComp != null) {
             playerComp.teamId = teamId;
             playerComp.skinId = skinId;
             playerComp.hasKey = hasKey;
             playerComp.hasFlag = hasFlag;
         }
-        
+
         if (isLocal && textRenderer != null && playerData.has("points")) {
             int points = playerData.getInt("points");
             textRenderer.setText("Points: " + points);

@@ -13,6 +13,8 @@ public class RectangleCollider extends Collider {
     public Transform transform;
     public float width;
     public float height;
+    public float offsetX = 0;
+    public float offsetY = 0;
 
     public RectangleCollider(Rectangle collider) {
         this.collider = collider;
@@ -31,7 +33,7 @@ public class RectangleCollider extends Collider {
 
     @Override
     public void update() {
-        collider.set(transform.position.x - width/2, transform.position.y - height/2, width, height);
+        collider.set(transform.position.x - width/2 + offsetX, transform.position.y - height/2 + offsetY, width, height);
     }
 
     @Override

@@ -1,9 +1,11 @@
 package com.bandera1.Components;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.bandera1.Engine.GameObjects.AnimationRenderer;
 import com.bandera1.Engine.GameObjects.Component;
+import com.bandera1.Engine.GameObjects.GameObject;
 import com.bandera1.Utils.ServerUtils;
 import com.bandera1.Engine.Systems.InputSystem;
 import com.badlogic.gdx.math.Vector2;
@@ -16,13 +18,14 @@ import com.bandera1.Engine.Systems.SceneSystem;
 public class PlayerMovement extends Component {
 
     ServerUtils server;
-
     AnimationRenderer animationRenderer;
+    AttackButton attackButton;
 
     @Override
     public void start() {
         server = ServerUtils.instance;
         animationRenderer = (AnimationRenderer) gameObject.getComponent(AnimationRenderer.class);
+        attackButton = GameObject.Find("attackButton").getComponent(AttackButton.class);
     }
 
     @Override
@@ -36,7 +39,7 @@ public class PlayerMovement extends Component {
         if (InputSystem.onTouch(0)) {
             Vector2 screenTouchPos = new Vector2(Gdx.input.getX(), SceneSystem.height - Gdx.input.getY());
 
-            boolean touchIsOnAttackButton = AttackButton.isScreenPosTouchingButton(screenTouchPos);
+            boolean touchIsOnAttackButton = false;//attackButton.isScreenPosTouchingButton(screenTouchPos);
 
             if (!touchIsOnAttackButton) {
                 float worldX = InputSystem.getTouchX();

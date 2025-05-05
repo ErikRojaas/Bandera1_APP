@@ -9,8 +9,6 @@ import com.bandera1.Engine.GameObjects.ImageRenderer;
 import com.bandera1.Components.*;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class GameScene extends Scene {
     public GameScene() {
@@ -47,7 +45,7 @@ public class GameScene extends Scene {
         gameTimer.addComponent(timerText);
         gameTimer.transform.scale.set(5, 5);
         addGameObject(gameTimer);
-        
+
         // Puntos del jugador
         GameObject playerPointsText = new GameObject("playerPointsText");
         TextRenderer playerPointsTextRenderer = new TextRenderer("Points: 0");
@@ -67,5 +65,11 @@ public class GameScene extends Scene {
         lifeIndicator.addComponent(healthText);
         lifeIndicator.transform.scale.set(4, 4); // Adjust scale as needed
         addGameObject(lifeIndicator);
+
+        GameObject attackButton = new GameObject("attackButton");
+        attackButton.addComponent(new AttackButton());
+        attackButton.addComponent(new TextureRenderer(new Texture("attack_button.png")));
+        attackButton.transform.scale.set(0.4f, 0.4f);
+        addGameObject(attackButton);
     }
 }

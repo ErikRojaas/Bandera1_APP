@@ -68,15 +68,14 @@ public class RoomScene extends Scene {
         addGameObject(roomTimer);
         // Back bottom Text
         GameObject backBottomText = new GameObject("backBottomText");
-        backBottomText.addComponent(new TextRenderer("Back to menu"));
-        backBottomText.addComponent(new TextureRenderer(new Texture("button.jpg")));
-        TextRenderer backLabel = new TextRenderer("Back to Menu");
-        backLabel.offsetX = labelOffsetX;
-        backLabel.offsetY = labelOffsetY;
-        backBottomText.addComponent(new RectangleCollider(100, 50));
+        backBottomText.addComponent(new TextureRenderer(new Texture("buttonLogin.png")));
         backBottomText.addComponent(new SceneChangingButton("Menu"));
+        TextRenderer backText = new TextRenderer("Back to menu");
+        backText.fontScale = 0.28f;
+        backBottomText.addComponent(backText);
+        backBottomText.addComponent(new RectangleCollider(100, 50));
         backBottomText.transform.position.set(-350, -200);
-        backBottomText.transform.scale.set(2, 2);
+        backBottomText.transform.scale.set(7f, 7f);
         addGameObject(backBottomText);
     }
 }

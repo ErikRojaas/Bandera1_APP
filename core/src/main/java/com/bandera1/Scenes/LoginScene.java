@@ -36,7 +36,7 @@ public class LoginScene extends Scene {
          */
         float labelOffsetX = 0;
         float labelOffsetY = 50f;
-        
+
         //Background
         GameObject background = new GameObject("background");
 
@@ -59,43 +59,47 @@ public class LoginScene extends Scene {
 
         //Login Form Elements
         GameObject loginEmail = new GameObject("loginEmail");
-        loginEmail.addComponent(new Textfield(new Texture("button.jpg"), new Texture("button4.jpg")));
+        loginEmail.addComponent(new Textfield(new Texture("buttonLogin.png"), new Texture("buttonLogin2.png")));
         TextRenderer emailLabel = new TextRenderer("Email:");
+        emailLabel.fontScale = 0.3f;
         emailLabel.offsetX = labelOffsetX;
         emailLabel.offsetY = labelOffsetY;
         loginEmail.addComponent(emailLabel);
         loginEmail.transform.position.set(0, 150);
-        loginEmail.transform.scale.set(2, 2);
+        loginEmail.transform.scale.set(7f, 5f);
         addGameObject(loginEmail);
 
         GameObject loginPassword = new GameObject("loginPassword");
-        loginPassword.addComponent(new Textfield(new Texture("button.jpg"), new Texture("button4.jpg")));
+        loginPassword.addComponent(new Textfield(new Texture("buttonLogin.png"), new Texture("buttonLogin2.png")));
         TextRenderer passwordLabel = new TextRenderer("Password:");
+        passwordLabel.fontScale = 0.3f;
         passwordLabel.offsetX = labelOffsetX;
         passwordLabel.offsetY = labelOffsetY;
         loginPassword.addComponent(passwordLabel);
         loginPassword.transform.position.set(0, 50);
-        loginPassword.transform.scale.set(2, 2);
+        loginPassword.transform.scale.set(7f, 5f);
         addGameObject(loginPassword);
 
         GameObject confirmLoginButton = new GameObject("confirmLoginButton");
-        confirmLoginButton.addComponent(new TextureRenderer(new Texture("button.jpg")));
+        confirmLoginButton.addComponent(new TextureRenderer(new Texture("buttonLogin.png")));
         TextRenderer confirmLoginText = new TextRenderer("Confirm Login");
-        confirmLoginText.fontScale = 0.8f;
+        confirmLoginText.fontScale = 0.28f;
         confirmLoginButton.addComponent(confirmLoginText);
-        confirmLoginButton.addComponent(new RectangleCollider(100, 50));
+        confirmLoginButton.addComponent(new RectangleCollider(160, 80));
         // Add login logic component
         confirmLoginButton.addComponent(new LoginLogic());
         confirmLoginButton.transform.position.set(0, -50);
-        confirmLoginButton.transform.scale.set(2f, 2f);
+        confirmLoginButton.transform.scale.set(6f, 6f);
         addGameObject(confirmLoginButton);
 
         GameObject registerButton = new GameObject("registerButton"); // Button to switch TO register view
-        registerButton.addComponent(new TextureRenderer(new Texture("button.jpg")));
-        registerButton.addComponent(new TextRenderer("Register"));
+        registerButton.addComponent(new TextureRenderer(new Texture("buttonLogin.png")));
+        TextRenderer registerText = new TextRenderer("Register");
+        registerText.fontScale = 0.28f;
+        registerButton.addComponent(registerText);
         registerButton.addComponent(new RectangleCollider(100, 50));
         registerButton.transform.position.set(-100, -190);
-        registerButton.transform.scale.set(2f, 2f);
+        registerButton.transform.scale.set(6f, 6f);
         addGameObject(registerButton);
 
         //Register Form Elements
@@ -103,70 +107,75 @@ public class LoginScene extends Scene {
         float registerCol2X = 200f;
 
         GameObject registerNickname = new GameObject("registerNickname");
-        registerNickname.addComponent(new Textfield(new Texture("button.jpg"), new Texture("button4.jpg")));
+        registerNickname.addComponent(new Textfield(new Texture("buttonLogin.png"), new Texture("buttonLogin2.png")));
         TextRenderer nicknameLabel = new TextRenderer("Nickname:");
+        nicknameLabel.fontScale = 0.3f;
         nicknameLabel.offsetX = labelOffsetX;
         nicknameLabel.offsetY = labelOffsetY;
         registerNickname.addComponent(nicknameLabel);
         registerNickname.transform.position.set(registerCol1X, 150);
-        registerNickname.transform.scale.set(2, 2);
+        registerNickname.transform.scale.set(7f, 5f);
         registerNickname.enabled = false;
         addGameObject(registerNickname);
 
         GameObject registerEmail = new GameObject("registerEmail");
-        registerEmail.addComponent(new Textfield(new Texture("button.jpg"), new Texture("button4.jpg")));
+        registerEmail.addComponent(new Textfield(new Texture("buttonLogin.png"), new Texture("buttonLogin2.png")));
         TextRenderer regEmailLabel = new TextRenderer("Email:");
+        regEmailLabel.fontScale = 0.3f;
         regEmailLabel.offsetX = labelOffsetX;
         regEmailLabel.offsetY = labelOffsetY;
         registerEmail.addComponent(regEmailLabel);
         registerEmail.transform.position.set(registerCol2X, 150);
-        registerEmail.transform.scale.set(2, 2);
+        registerEmail.transform.scale.set(7f, 5f);
         registerEmail.enabled = false;
         addGameObject(registerEmail);
 
         GameObject registerPhone = new GameObject("registerPhone");
-        registerPhone.addComponent(new Textfield(new Texture("button.jpg"), new Texture("button4.jpg")));
+        registerPhone.addComponent(new Textfield(new Texture("buttonLogin.png"), new Texture("buttonLogin2.png")));
         TextRenderer phoneLabel = new TextRenderer("Phone:");
+        phoneLabel.fontScale = 0.3f;
         phoneLabel.offsetX = labelOffsetX;
         phoneLabel.offsetY = labelOffsetY;
         registerPhone.addComponent(phoneLabel);
         registerPhone.transform.position.set(registerCol1X, 50);
-        registerPhone.transform.scale.set(2, 2);
+        registerPhone.transform.scale.set(7f, 5f);
         registerPhone.enabled = false;
         addGameObject(registerPhone);
 
         GameObject registerPassword = new GameObject("registerPassword");
-        registerPassword.addComponent(new Textfield(new Texture("button.jpg"), new Texture("button4.jpg")));
+        registerPassword.addComponent(new Textfield(new Texture("buttonLogin.png"), new Texture("buttonLogin2.png")));
         TextRenderer regPasswordLabel = new TextRenderer("Password:");
+        regPasswordLabel.fontScale = 0.3f;
         regPasswordLabel.offsetX = labelOffsetX;
         regPasswordLabel.offsetY = labelOffsetY;
         registerPassword.addComponent(regPasswordLabel);
         registerPassword.transform.position.set(registerCol2X, 50);
-        registerPassword.transform.scale.set(2, 2);
+        registerPassword.transform.scale.set(7f, 5f);
         registerPassword.enabled = false;
         addGameObject(registerPassword);
 
         GameObject registerPasswordConfirmation = new GameObject("registerPasswordConfirmation");
-        registerPasswordConfirmation.addComponent(new Textfield(new Texture("button.jpg"), new Texture("button4.jpg")));
+        registerPasswordConfirmation.addComponent(new Textfield(new Texture("buttonLogin.png"), new Texture("buttonLogin2.png")));
         TextRenderer confirmPwdLabel = new TextRenderer("Confirm Password:");
+        confirmPwdLabel.fontScale = 0.3f;
         confirmPwdLabel.offsetX = labelOffsetX;
         confirmPwdLabel.offsetY = labelOffsetY;
         registerPasswordConfirmation.addComponent(confirmPwdLabel);
         registerPasswordConfirmation.transform.position.set(registerCol1X, -50);
-        registerPasswordConfirmation.transform.scale.set(2, 2);
+        registerPasswordConfirmation.transform.scale.set(7f, 5f);
         registerPasswordConfirmation.enabled = false;
         addGameObject(registerPasswordConfirmation);
 
         GameObject confirmRegisterButton = new GameObject("confirmRegisterButton");
-        confirmRegisterButton.addComponent(new TextureRenderer(new Texture("button.jpg")));
+        confirmRegisterButton.addComponent(new TextureRenderer(new Texture("buttonLogin.png")));
         TextRenderer confirmRegisterText = new TextRenderer("Confirm Register");
-        confirmRegisterText.fontScale = 0.7f;
+        confirmRegisterText.fontScale = 0.23f;
         confirmRegisterButton.addComponent(confirmRegisterText);
         confirmRegisterButton.addComponent(new RectangleCollider(100, 50));
         // Add registration logic component
         confirmRegisterButton.addComponent(new RegisterLogic());
         confirmRegisterButton.transform.position.set(registerCol2X, -50);
-        confirmRegisterButton.transform.scale.set(2f, 2f);
+        confirmRegisterButton.transform.scale.set(6f, 6f);
         confirmRegisterButton.enabled = false;
         addGameObject(confirmRegisterButton);
 
@@ -186,32 +195,34 @@ public class LoginScene extends Scene {
         addGameObject(termsOfServiceLink);
 
         GameObject loginButton = new GameObject("loginButton"); // Button to switch TO login view
-        loginButton.addComponent(new TextureRenderer(new Texture("button.jpg")));
-        loginButton.addComponent(new TextRenderer("Login"));
+        loginButton.addComponent(new TextureRenderer(new Texture("buttonLogin.png")));
+        TextRenderer loginText = new TextRenderer("Login");
+        loginText.fontScale = 0.28f;
+        loginButton.addComponent(loginText);
         loginButton.addComponent(new RectangleCollider(100, 50));
         loginButton.transform.position.set(-100, -190);
-        loginButton.transform.scale.set(2f, 2f);
+        loginButton.transform.scale.set(6f, 6f);
         loginButton.enabled = false;
         addGameObject(loginButton);
 
         // Shared Elements
         GameObject playGuest = new GameObject("playGuest");
-        playGuest.addComponent(new TextureRenderer(new Texture("button.jpg")));
+        playGuest.addComponent(new TextureRenderer(new Texture("buttonLogin.png")));
         playGuest.addComponent(new SceneChangingButton("Room"));
         TextRenderer playGuestText = new TextRenderer("Play as Guest");
-        playGuestText.fontScale = 0.8f;
+        playGuestText.fontScale = 0.28f;
         playGuest.addComponent(playGuestText);
         playGuest.addComponent(new RectangleCollider(100, 50));
         playGuest.transform.position.set(100, -190);
-        playGuest.transform.scale.set(2f, 2f);
+        playGuest.transform.scale.set(6f, 6f);
         addGameObject(playGuest);
 
         // Define elements for each view
         List<String> loginViewElements = Arrays.asList("loginEmail", "loginPassword", "confirmLoginButton", "registerButton");
-        List<String> registerViewElements = Arrays.asList("registerNickname", "registerEmail", "registerPhone", 
-                "registerPassword", "registerPasswordConfirmation", "confirmRegisterButton", "loginButton", 
+        List<String> registerViewElements = Arrays.asList("registerNickname", "registerEmail", "registerPhone",
+                "registerPassword", "registerPasswordConfirmation", "confirmRegisterButton", "loginButton",
                 "termsCheckbox", "termsOfServiceLink");
-        
+
         // Add view switching logic to buttons
         loginButton.addComponent(new ObjectHideShowButton(registerViewElements, loginViewElements, true));
         registerButton.addComponent(new ObjectHideShowButton(loginViewElements.subList(0, 3), registerViewElements, true));

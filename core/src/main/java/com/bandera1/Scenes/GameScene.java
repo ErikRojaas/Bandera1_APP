@@ -1,6 +1,7 @@
 package com.bandera1.Scenes;
 
 import com.bandera1.Engine.GameObjects.AnimationRenderer;
+import com.bandera1.Engine.GameObjects.CircleCollider;
 import com.bandera1.Engine.GameObjects.GameObject;
 import com.bandera1.Engine.GameObjects.Scene;
 import com.bandera1.Engine.GameObjects.TextureRenderer;
@@ -67,6 +68,7 @@ public class GameScene extends Scene {
         addGameObject(lifeIndicator);
 
         GameObject attackButton = new GameObject("attackButton");
+        attackButton.addComponent(new CircleCollider(50));
         attackButton.addComponent(new AttackButton());
         attackButton.addComponent(new TextureRenderer(new Texture("attack_button.png")));
         attackButton.transform.scale.set(0.4f, 0.4f);

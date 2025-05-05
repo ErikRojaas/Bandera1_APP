@@ -16,26 +16,10 @@ public class CircleCollider extends Collider {
         this.collider = new Circle(0, 0, radius);
         this.radius = radius;
     }
-    
-    @Override
-    public void start() {
-        if (gameObject != null) {
-            transform = gameObject.transform;
-        } else {
-            Gdx.app.error("CircleCollider", "GameObject es null en start");
-        }
-    }
 
     @Override
     public void update() {
-        if (transform == null) {
-            if (gameObject != null)
-                transform = gameObject.transform;
-            if (transform == null)
-                return;
-        }
-
-        Vector3 position = SceneSystem.camera.project(new Vector3(transform.position.x, transform.position.y, 0));
+        Vector2 position = gameObject.transform.position.cpy();
         collider.setPosition(position.x, position.y);
         collider.setRadius(radius);
     }
@@ -53,6 +37,9 @@ public class CircleCollider extends Collider {
 
     @Override
     public boolean isInside(Vector2 point) {
+        Gdx.app.log("CircleCollider", ""+collider.contains(point.x, point.y));
+        Gdx.app.log("CircleCollider", ""+collider.x + ", " + collider.y + ", " + collider.radius);
+        Gdx.app.log("CircleCollider", ""+point.x + ", " + point.y);
         return collider.contains(point.x, point.y);
     }
 }

@@ -139,43 +139,8 @@ public class PlayerManager extends Component implements WebSocketEventListener {
             healthTextRenderer.setText(String.valueOf(health));
         }
 
-        AnimationRenderer renderer = player.getComponent(AnimationRenderer.class);
-        if (renderer != null) {
-            float delta = Gdx.graphics.getDeltaTime();
-
-            if (attackCooldown > 0f) attackCooldown -= delta;
-
-            if (isAttacking) {
-                attackTimer -= delta;
-                if (attackTimer <= 0f) {
-                    isAttacking = false;
-                    if (playerComp != null) playerComp.isAttacking = false;
-                }
-            }
-
-            if (!isAttacking) {
-                if (dx == 0 && dy == 0) {
-                    renderer.play("IDLE_" + lastDirection.name());
-                } else {
-                    lastDirection = Math.abs(dx) > Math.abs(dy)
-                            ? (dx > 0 ? PlayerAnimator.Direction.RIGHT : PlayerAnimator.Direction.LEFT)
-                            : (dy > 0 ? PlayerAnimator.Direction.UP : PlayerAnimator.Direction.DOWN);
-                    renderer.play("WALK_" + lastDirection.name());
-                }
-            }
-
-            if (isLocal && attackRequested && attackCooldown <= 0f && !isAttacking) {
-                attackRequested = false;
-                if (playerComp == null || playerComp.hasKey || playerComp.hasFlag /* || playerComp.isDead */) return;
-
-                renderer.play("ATTACK_" + lastDirection.name());
-                isAttacking = true;
-                playerComp.isAttacking = true;
-                attackTimer = attackAnimDuration;
-                attackCooldown = attackCooldownTime;
-
-                checkForHit();
-            }
+        if (isLocal && attackRequested) {
+            checkForHit();
         }
     }
 

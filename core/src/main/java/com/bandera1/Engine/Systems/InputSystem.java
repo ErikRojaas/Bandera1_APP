@@ -3,8 +3,14 @@ package com.bandera1.Engine.Systems;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
+
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class InputSystem implements InputProcessor {
     private static Set<Integer> keysDown = new HashSet<>();
@@ -12,26 +18,17 @@ public class InputSystem implements InputProcessor {
     private static Set<Integer> keys = new HashSet<>();
     private static Set<Character> keysTyped = new HashSet<>();
 
-    private static boolean isTouching = false;
-    private static boolean justTouched = false;
-    private static boolean justReleased = false;
-    private static float touchX = -1, touchY = -1;
-    private static int touchButton = -1;
+    // New multi-touch tracking structures
+    private static Map<Integer, Vector2> currentTouches = new HashMap<>(); // pointerId -> position
+    private static Map<Integer, Integer> currentButtons = new HashMap<>(); // pointerId -> button
+    private static Set<Integer> justDownPointers = new HashSet<>(); // Pointers that went down this frame
+    private static Set<Integer> justUpPointers = new HashSet<>();   // Pointers that went up this frame
+    private static Map<Integer, Integer> justUpPointerButtons = new HashMap<>(); // Keep track of buttons for pointers that went up this frame
 
     private static float mouseX = -1, mouseY = -1;
     private static float scrollX = 0, scrollY = 0;
     private static boolean mouseMoved = false;
     private static boolean scrolled = false;
-
-    // Multi-touch support
-    private static class TouchInfo {
-        boolean isTouching = false;
-        boolean justTouched = false;
-        boolean justReleased = false;
-        float x = -1, y = -1;
-        int button = -1;
-    }
-    private static java.util.Map<Integer, TouchInfo> touches = new java.util.HashMap<>();
 
     // Key input methods
     public static boolean onKeyDown(int keycode) {
@@ -62,45 +59,135 @@ public class InputSystem implements InputProcessor {
         return keysTyped;
     }
 
-    // Touch input methods
+    // --- Legacy Touch input methods (for backward compatibility) ---
+
+    /** @return True if any finger just touched the screen this frame. */
     public static boolean onTouchDown() {
-        return justTouched;
+        return !justDownPointers.isEmpty();
     }
 
+    /** @return True if any finger is currently touching the screen. */
     public static boolean onTouch() {
-        return isTouching;
+        return !currentTouches.isEmpty();
     }
 
+    /** @return True if any finger was just released from the screen this frame. */
     public static boolean onTouchUp() {
-        return justReleased;
+        return !justUpPointers.isEmpty();
     }
 
+    /** @return True if any finger just touched the screen with the specified button this frame. */
     public static boolean onTouchDown(int button) {
-        return justTouched && touchButton == button;
+        if (justDownPointers.isEmpty()) return false;
+        for (int pointer : justDownPointers) {
+            if (currentButtons.getOrDefault(pointer, -1) == button) {
+                return true;
+            }
+        }
+        return false;
     }
 
+    /** @return True if any finger is currently touching the screen with the specified button. */
     public static boolean onTouch(int button) {
-        return isTouching && touchButton == button;
+        if (currentTouches.isEmpty()) return false;
+        for (int pointer : currentTouches.keySet()) {
+             if (currentButtons.getOrDefault(pointer, -1) == button) {
+                return true;
+            }
+        }
+        return false;
     }
 
+    /** @return True if any finger was just released from the screen with the specified button this frame. */
     public static boolean onTouchUp(int button) {
-        return justReleased && touchButton == button;
+         if (justUpPointers.isEmpty()) return false;
+         for (int pointer : justUpPointers) {
+             if (justUpPointerButtons.getOrDefault(pointer, -1) == button) {
+                 return true;
+             }
+         }
+         return false;
     }
 
+    /** @return The world coordinates of the touch with the lowest pointer ID, or (-1, -1) if no fingers are touching. */
     public static Vector2 getTouchPosition() {
-        return SceneSystem.ScreenToWorldPoint(new Vector2(touchX, touchY));
+        if (currentTouches.isEmpty()) {
+            // Return a default value consistent with previous behavior if possible
+            // Be cautious as (-1, -1) screen coordinates might map to valid world coordinates
+             return SceneSystem.ScreenToWorldPoint(new Vector2(-1, -1)); // Or consider returning null
+        }
+        int minPointer = Collections.min(currentTouches.keySet());
+        return SceneSystem.ScreenToWorldPoint(currentTouches.get(minPointer));
     }
 
+    /** @return The world X coordinate of the touch with the lowest pointer ID, or a default value if no fingers are touching. */
     public static float getTouchX() {
-        return SceneSystem.ScreenToWorldPoint(new Vector2(touchX, touchY)).x;
+        return getTouchPosition().x; // Assumes getTouchPosition handles the "no touch" case
     }
 
+    /** @return The world Y coordinate of the touch with the lowest pointer ID, or a default value if no fingers are touching. */
     public static float getTouchY() {
-        return SceneSystem.ScreenToWorldPoint(new Vector2(touchX, touchY)).y;
+        return getTouchPosition().y; // Assumes getTouchPosition handles the "no touch" case
     }
 
+    /** @return The button associated with the touch with the lowest pointer ID, or -1 if no fingers are touching. */
     public static int getTouchButton() {
-        return touchButton;
+        if (currentTouches.isEmpty()) {
+            return -1;
+        }
+        int minPointer = Collections.min(currentTouches.keySet());
+        return currentButtons.getOrDefault(minPointer, -1);
+    }
+
+    // --- New Multi-Touch input methods ---
+
+    /** @return True if the specified pointer just touched the screen this frame. */
+    public static boolean isPointerJustDown(int pointer) {
+        return justDownPointers.contains(pointer);
+    }
+
+    /** @return True if the specified pointer is currently touching the screen. */
+    public static boolean isPointerDown(int pointer) {
+        return currentTouches.containsKey(pointer);
+    }
+
+     /** @return True if the specified pointer was just released from the screen this frame. */
+    public static boolean isPointerJustUp(int pointer) {
+        return justUpPointers.contains(pointer);
+    }
+
+    /** @return The world coordinates for the specified pointer, or null if the pointer is not down. */
+    public static Vector2 getPointerPosition(int pointer) {
+        Vector2 screenPos = currentTouches.get(pointer);
+        return (screenPos != null) ? SceneSystem.ScreenToWorldPoint(screenPos) : null;
+    }
+
+    /** @return The button associated with the specified pointer, or -1 if the pointer is not down. */
+    public static int getPointerButton(int pointer) {
+        return currentButtons.getOrDefault(pointer, -1);
+    }
+
+    /** @return The set of currently active pointer IDs. */
+    public static Set<Integer> getActivePointers() {
+        return Collections.unmodifiableSet(currentTouches.keySet());
+    }
+
+     /** @return The set of pointer IDs that just touched down this frame. */
+    public static Set<Integer> getJustDownPointers() {
+        return Collections.unmodifiableSet(justDownPointers);
+    }
+
+    /** @return The set of pointer IDs that were just released this frame. */
+    public static Set<Integer> getJustUpPointers() {
+         return Collections.unmodifiableSet(justUpPointers);
+    }
+
+    public static List<Vector2> getCurrentTouches() {
+        List<Vector2> touches = new ArrayList<Vector2>();
+        for (int pointer : currentTouches.keySet()) {
+            touches.add(currentTouches.get(pointer));
+        }
+        return touches;
     }
 
     // Mouse movement methods
@@ -133,30 +220,6 @@ public class InputSystem implements InputProcessor {
         return scrollY;
     }
 
-    // Multi-touch input methods
-    public static boolean onTouchDown(int pointer) {
-        TouchInfo info = touches.get(pointer);
-        return info != null && info.justTouched;
-    }
-    public static boolean onTouch(int pointer) {
-        TouchInfo info = touches.get(pointer);
-        return info != null && info.isTouching;
-    }
-    public static boolean onTouchUp(int pointer) {
-        TouchInfo info = touches.get(pointer);
-        return info != null && info.justReleased;
-    }
-    public static Vector2 getTouchPosition(int pointer) {
-        TouchInfo info = touches.get(pointer);
-        if (info == null) return null;
-        return SceneSystem.ScreenToWorldPoint(new Vector2(info.x, info.y));
-    }
-    public static int getTouchButton(int pointer) {
-        TouchInfo info = touches.get(pointer);
-        if (info == null) return -1;
-        return info.button;
-    }
-
     @Override
     public boolean keyDown(int keycode) {
         if (!keys.contains(keycode)) {
@@ -175,73 +238,40 @@ public class InputSystem implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        // Multi-touch
-        TouchInfo info = touches.get(pointer);
-        if (info == null) info = new TouchInfo();
-        info.isTouching = true;
-        info.justTouched = true;
-        info.justReleased = false;
-        info.x = screenX;
-        info.y = screenY;
-        info.button = button;
-        touches.put(pointer, info);
-        // Old API (primary touch)
-        isTouching = true;
-        justTouched = true;
-        touchX = screenX;
-        touchY = screenY;
-        touchButton = button;
+        Gdx.app.log("Touch", "Touch down: " + pointer + ", " + button);
+        justDownPointers.add(pointer);
+        currentTouches.put(pointer, new Vector2(screenX, screenY));
+        currentButtons.put(pointer, button);
         return true;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        // Multi-touch
-        TouchInfo info = touches.get(pointer);
-        if (info == null) info = new TouchInfo();
-        info.isTouching = false;
-        info.justTouched = false;
-        info.justReleased = true;
-        info.x = screenX;
-        info.y = screenY;
-        info.button = button;
-        touches.put(pointer, info);
-        // Old API (primary touch)
-        isTouching = false;
-        justReleased = true;
-        touchButton = button;
+        if (currentTouches.containsKey(pointer)) {
+            justUpPointers.add(pointer);
+            justUpPointerButtons.put(pointer, currentButtons.getOrDefault(pointer, -1));
+            currentTouches.remove(pointer);
+            currentButtons.remove(pointer);
+        }
         return true;
     }
 
     @Override
     public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-        // Multi-touch
-        TouchInfo info = touches.get(pointer);
-        if (info == null) info = new TouchInfo();
-        info.isTouching = false;
-        info.justTouched = false;
-        info.justReleased = true;
-        info.x = screenX;
-        info.y = screenY;
-        info.button = button;
-        touches.put(pointer, info);
-        // Old API (primary touch)
-        isTouching = false;
-        justReleased = true;
+        if (currentTouches.containsKey(pointer)) {
+            justUpPointers.add(pointer);
+            justUpPointerButtons.put(pointer, currentButtons.getOrDefault(pointer, -1));
+            currentTouches.remove(pointer);
+            currentButtons.remove(pointer);
+        }
         return true;
     }
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        // Multi-touch
-        TouchInfo info = touches.get(pointer);
-        if (info == null) info = new TouchInfo();
-        info.x = screenX;
-        info.y = screenY;
-        touches.put(pointer, info);
-        // Old API (primary touch)
-        touchX = screenX;
-        touchY = screenY;
+        if (currentTouches.containsKey(pointer)) {
+            currentTouches.get(pointer).set(screenX, screenY);
+        }
         return true;
     }
 
@@ -265,18 +295,11 @@ public class InputSystem implements InputProcessor {
         keysDown.clear();
         keysUp.clear();
         keysTyped.clear();
-        if (!isTouching)
-            touchButton = -1;
-        justTouched = false;
-        justReleased = false;
-        // Multi-touch: reset per-pointer justTouched/justReleased
-        for (TouchInfo info : touches.values()) {
-            info.justTouched = false;
-            info.justReleased = false;
-            if (!info.isTouching) {
-                info.button = -1;
-            }
-        }
+
+        justDownPointers.clear();
+        justUpPointers.clear();
+        justUpPointerButtons.clear();
+
         mouseMoved = false;
         scrolled = false;
         scrollX = 0;

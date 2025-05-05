@@ -10,11 +10,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
 import com.bandera1.Utils.ServerMessage;
 import java.lang.Math;
+import com.bandera1.Components.AttackButton;
+import com.bandera1.Engine.Systems.SceneSystem;
 
 public class PlayerMovement extends Component {
 
     ServerUtils server;
-    
+
     AnimationRenderer animationRenderer;
 
     @Override
@@ -28,40 +30,45 @@ public class PlayerMovement extends Component {
 
         if (animationRenderer == null) {
             animationRenderer = gameObject.getComponent(AnimationRenderer.class);
-            if (animationRenderer == null) return; 
+            if (animationRenderer == null) return;
         }
 
         if (InputSystem.onTouch(0)) {
-            float x = InputSystem.getTouchX();
-            float y = InputSystem.getTouchY();
-            Vector2 direction = new Vector2(x, y).sub(gameObject.transform.position);
-            direction.nor();
-            //get the direction as a string for the server
-            JsonValue data = new JsonValue(JsonValue.ValueType.object);
-            JsonValue directionJson = new JsonValue(JsonValue.ValueType.object);
-            directionJson.addChild("dx",new JsonValue(direction.x*1.0));
-            directionJson.addChild("dy",new JsonValue(direction.y*1.0));
-            data.addChild("direction",directionJson);
-            Gdx.app.log("PlayerMovement",directionJson.toString());
-            //send the direction to the server
-            server.send(new ServerMessage("direction", data));
-            handleWalkAnimation(x, y);
+            Vector2 screenTouchPos = new Vector2(Gdx.input.getX(), SceneSystem.height - Gdx.input.getY());
+
+            boolean touchIsOnAttackButton = AttackButton.isScreenPosTouchingButton(screenTouchPos);
+
+            if (!touchIsOnAttackButton) {
+                float worldX = InputSystem.getTouchX();
+                float worldY = InputSystem.getTouchY();
+                Vector2 direction = new Vector2(worldX, worldY).sub(gameObject.transform.position);
+                direction.nor();
+
+                JsonValue data = new JsonValue(JsonValue.ValueType.object);
+                JsonValue directionJson = new JsonValue(JsonValue.ValueType.object);
+                directionJson.addChild("dx", new JsonValue(direction.x * 1.0));
+                directionJson.addChild("dy", new JsonValue(direction.y * 1.0));
+                data.addChild("direction", directionJson);
+                server.send(new ServerMessage("direction", data));
+
+                handleWalkAnimation(worldX, worldY);
+            }
         } else if (InputSystem.onTouchUp(0)) {
-            //stop moving
             JsonValue data = new JsonValue(JsonValue.ValueType.object);
             JsonValue directionJson = new JsonValue(JsonValue.ValueType.object);
-            directionJson.addChild("dx",new JsonValue(0));
-            directionJson.addChild("dy",new JsonValue(0));
-            data.addChild("direction",directionJson);
+            directionJson.addChild("dx", new JsonValue(0));
+            directionJson.addChild("dy", new JsonValue(0));
+            data.addChild("direction", directionJson);
             server.send(new ServerMessage("direction", data));
-            float x = InputSystem.getTouchX();
-            float y = InputSystem.getTouchY();
-            handleIdleAnimation(x, y);
+
+            float worldX = InputSystem.getTouchX();
+            float worldY = InputSystem.getTouchY();
+            handleIdleAnimation(worldX, worldY);
         }
     }
 
-    public void handleWalkAnimation(float x, float y) {
-        Vector2 direction = new Vector2(x, y).sub(gameObject.transform.position);
+    public void handleWalkAnimation(float worldX, float worldY) {
+        Vector2 direction = new Vector2(worldX, worldY).sub(gameObject.transform.position);
         direction.nor();
         if (Math.abs(direction.x) > Math.abs(direction.y)) {
             if (direction.x > 0) {
@@ -78,8 +85,8 @@ public class PlayerMovement extends Component {
         }
     }
 
-    public void handleIdleAnimation(float x, float y) {
-        Vector2 direction = new Vector2(x, y).sub(gameObject.transform.position);
+    public void handleIdleAnimation(float worldX, float worldY) {
+        Vector2 direction = new Vector2(worldX, worldY).sub(gameObject.transform.position);
         direction.nor();
         if (Math.abs(direction.x) > Math.abs(direction.y)) {
             if (direction.x > 0) {

@@ -22,7 +22,6 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     private TextRenderer textRenderer;
     private TextRenderer healthTextRenderer;
     private boolean active;
-    private PlayerAnimator.Direction lastDirection = PlayerAnimator.Direction.DOWN;
 
     public static boolean attackRequested = false;
     private boolean isAttacking = false;
@@ -100,8 +99,6 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
         float x = playerData.getFloat("x");
         float y = playerData.getFloat("y");
-        float dx = playerData.get("moveVector").getFloat("dx");
-        float dy = playerData.get("moveVector").getFloat("dy");
         float speedX = playerData.get("speedVector").getFloat("speedX");
         float speedY = playerData.get("speedVector").getFloat("speedY");
         String nickname = playerData.getString("nickname", isLocal ? "You" : "Player");
@@ -123,10 +120,17 @@ public class PlayerManager extends Component implements WebSocketEventListener {
         Player playerComp = player.getComponent(Player.class);
 
         if (playerComp != null) {
+            boolean updatedKey = playerComp.hasKey != hasKey;
+            boolean updatedFlag = playerComp.hasFlag != hasFlag;
             playerComp.teamId = teamId;
             playerComp.skinId = skinId;
             playerComp.hasKey = hasKey;
             playerComp.hasFlag = hasFlag;
+
+            if (isLocal && (updatedKey || updatedFlag)) {
+                Gdx.app.log("PlayerManager", "Cambiando animaciones del jugador local por key/flag");
+                updateAnimationRenderer(player, skinId, hasKey, hasFlag);
+            }
         }
 
         if (isLocal && textRenderer != null && playerData.has("points")) {
@@ -146,19 +150,22 @@ public class PlayerManager extends Component implements WebSocketEventListener {
 
     private void checkForHit() {
         Vector2 origin = new Vector2(player.transform.position);
-        Vector2 dir = new Vector2(0, 0);
-        switch (lastDirection) {
-            case UP: dir.y = 1; break;
-            case DOWN: dir.y = -1; break;
-            case LEFT: dir.x = -1; break;
-            case RIGHT: dir.x = 1; break;
+        Player playerComp = player.getComponent(Player.class);
+        PlayerAnimator.Direction dir = playerComp != null ? playerComp.lastDirection : PlayerAnimator.Direction.LEFT;
+
+        Vector2 direction = new Vector2(0, 0);
+        switch (dir) {
+            case UP: direction.y = 1; break;
+            case DOWN: direction.y = -1; break;
+            case LEFT: direction.x = -1; break;
+            case RIGHT: direction.x = 1; break;
         }
 
-        Vector2 attackPos = origin.add(dir.scl(attackRange));
+        Vector2 attackPos = origin.add(direction.scl(attackRange));
 
         for (GameObject enemy : otherPlayers.values()) {
             Player enemyComp = enemy.getComponent(Player.class);
-            if (enemyComp == null || enemyComp.teamId == player.getComponent(Player.class).teamId) continue;
+            if (enemyComp == null || enemyComp.teamId == playerComp.teamId) continue;
 
             float dist = enemy.transform.position.dst(attackPos);
             if (dist < attackRange) {
@@ -227,7 +234,6 @@ public class PlayerManager extends Component implements WebSocketEventListener {
     }
 
     private void ensureTextRenderers(GameObject player, String nickname, int teamId) {
-        Gdx.app.log("PlayerManager", "ensureTextRenderers");
         TextRenderer teamText = player.getComponent(TextRenderer.class);
         if (teamText == null) {
             teamText = new TextRenderer(getTeamName(teamId));
@@ -268,7 +274,10 @@ public class PlayerManager extends Component implements WebSocketEventListener {
                 renderer.addAnimation(act.name() + "_" + dir.name(), animator.getAnimation(act, dir));
             }
         }
-        renderer.play("IDLE_" + lastDirection.name());
+
+        Player p = player.getComponent(Player.class);
+        PlayerAnimator.Direction dir = p != null ? p.lastDirection : PlayerAnimator.Direction.DOWN;
+        renderer.play("IDLE_" + dir.name());
     }
 
     private void createAnimationRenderer(GameObject player, JsonValue data) {

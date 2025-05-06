@@ -1,5 +1,6 @@
 package com.bandera1.Components;
 
+import com.bandera1.Components.PlayerAnimator.Direction;
 import com.bandera1.Engine.GameObjects.Component;
 
 public class Player extends Component {
@@ -15,7 +16,8 @@ public class Player extends Component {
     public int health = 3;
     public boolean isDead = false;
     public float respawnTimeLeft = 0f;
-
+    public Direction lastDirection = Direction.DOWN;
+    
     public Player() {}
 
     public Player(String id, int skinId, boolean hasKey, boolean hasFlag, int teamId) {
